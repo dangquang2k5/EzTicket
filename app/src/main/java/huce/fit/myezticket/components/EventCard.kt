@@ -1,4 +1,4 @@
-package huce.fit.myezticket
+package huce.fit.myezticket.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage // Thư viện Coil bạn vừa Sync ở Bước 0
 import androidx.compose.ui.tooling.preview.Preview
+import huce.fit.myezticket.Event
+
 @Composable
 fun EventCard(event: Event) {
     // Card tạo khung bo góc và đổ bóng cho cái vé

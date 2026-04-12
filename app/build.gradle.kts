@@ -69,6 +69,8 @@ dependencies {
     // Tiện thể, nếu bạn dùng collectAsState, nên thêm cái này để tối ưu hiệu năng (năm 2026 nên có)
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
 
+    // Dòng này giúp bạn dùng được tất cả các icon của Google
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -85,4 +87,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }

@@ -1,4 +1,4 @@
-package huce.fit.myezticket
+package huce.fit.myezticket.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import huce.fit.myezticket.Event
 
 @Composable
 fun SpecialEventSection(events: List<Event>) {
