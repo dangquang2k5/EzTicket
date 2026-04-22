@@ -1,4 +1,4 @@
-package huce.fit.myezticket.components
+package huce.fit.myezticket.ui.components
 
 
 

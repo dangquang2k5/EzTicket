@@ -1,4 +1,4 @@
-package huce.fit.myezticket
+package huce.fit.myezticket.data.model
 
 import com.google.firebase.Timestamp
 

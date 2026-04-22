@@ -53,18 +53,15 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")      // Đăng ký/Đăng nhập
     implementation("com.google.firebase:firebase-storage")   // Lưu ảnh poster
 
+    //hỗ trợ Coroutines (suspend/await) cho Firebase
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
     // Thêm thư viện hỗ trợ load ảnh từ mạng cho Compose (Rất quan trọng)
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // 1. Firebase Firestore (Thư viện chính để lấy dữ liệu sự kiện)
-    implementation("com.google.firebase:firebase-firestore")
-
-    // 2. Coil for Compose (Thư viện siêu nhẹ để load ảnh từ link URL)
-    implementation("io.coil-kt:coil-compose:2.6.0")
-
-
-    // Thư viện này giúp bạn dùng được hàm viewModel() trong Compose
+// 4. Lifecycle & ViewModel cho Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
 
     // Tiện thể, nếu bạn dùng collectAsState, nên thêm cái này để tối ưu hiệu năng (năm 2026 nên có)
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")

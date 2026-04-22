@@ -1,4 +1,4 @@
-package huce.fit.myezticket.screens
+package huce.fit.myezticket.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,11 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 // Import ViewModel và Model từ package gốc
-import huce.fit.myezticket.EventViewModel
-import huce.fit.myezticket.Event
+import huce.fit.myezticket.ui.viewmodel.EventViewModel
 
 // Import tất cả các linh kiện từ package components
-import huce.fit.myezticket.components.*
+import huce.fit.myezticket.ui.components.BannerSlider
+import huce.fit.myezticket.ui.components.HomeBottomNavigation
+import huce.fit.myezticket.ui.components.HomeHeader
+import huce.fit.myezticket.ui.components.SpecialEventSection
 
 @Composable
 fun HomeScreen(eventViewModel: EventViewModel = viewModel()) {

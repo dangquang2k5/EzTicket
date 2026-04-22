@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import huce.fit.myezticket.screens.HomeScreen // Import màn hình chính từ package screens
+import huce.fit.myezticket.ui.screens.HomeScreen // Import màn hình chính từ package screens
 import huce.fit.myezticket.ui.theme.MyEzTicketTheme
 
 class MainActivity : ComponentActivity() {
