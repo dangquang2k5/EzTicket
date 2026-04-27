@@ -18,6 +18,9 @@ class EventViewModel : ViewModel() {
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events.asStateFlow()
 
+    private val _bannerEvents = MutableStateFlow<List<Event>>(emptyList())
+    val bannerEvents: StateFlow<List<Event>> = _bannerEvents.asStateFlow()
+
     init {
         loadEvents()
     }
@@ -29,6 +32,9 @@ class EventViewModel : ViewModel() {
             // "Order" dữ liệu từ Repository và cập nhật lên UI
             val dataFromFirebase = repository.getEvents()
             _events.value = dataFromFirebase
+
+            // Lọc ra các sự kiện có isBanner == true
+            _bannerEvents.value = dataFromFirebase.filter { it.isBanner }
         }
     }
 }

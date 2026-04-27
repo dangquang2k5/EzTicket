@@ -69,6 +69,9 @@ dependencies {
     // Dòng này giúp bạn dùng được tất cả các icon của Google
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Thư viện giúp chuyển màn hình
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

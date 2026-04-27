@@ -1,6 +1,7 @@
 package huce.fit.myezticket.data.model
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.PropertyName
 
 data class Event(
     // 1. id này dùng để lưu cái mã Document ID loằng ngoằng của Firebase
@@ -15,6 +16,9 @@ data class Event(
     val description: String = "",
     val stock: Int = 0,
     val sold: Int = 0,
-    val category: String = ""
+    val category: String = "",
+    @get:PropertyName("isBanner")
+    @set:PropertyName("isBanner")
+    var isBanner: Boolean = false
     //Firebase yêu cầu một "Empty Constructor" (hàm khởi tạo trống) để nó có thể tự động đổ dữ liệu vào.
 )

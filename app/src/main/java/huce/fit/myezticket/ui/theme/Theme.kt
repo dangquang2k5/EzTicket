@@ -1,58 +1,48 @@
 package huce.fit.myezticket.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
+// 1. Cấu hình bảng màu tối (Dark Mode)
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = TicketGreen,       // Sử dụng biến màu từ Color.kt
+    secondary = TicketGray,
+    tertiary = TicketOrange,
+    background = Color(0xFF1C1B1F),
+    surface = Color(0xFF1C1B1F),
+    error = TicketRed
 )
 
+// 2. Cấu hình bảng màu sáng (Light Mode) - CHUẨN NHẤT
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
+    primary = TicketGreen,       // Màu xanh chủ đạo của MyEzTicket
+    onPrimary = Color.White,     // Màu chữ trên nền xanh (thường là trắng)
+    secondary = TicketGray,      // Màu phụ (cho các icon, text phụ)
+    tertiary = TicketOrange,    // Đổi Pink40 hoặc các màu cũ thành TicketOrange
+    error = TicketRed,           // Dùng cho giá vé, thông báo lỗi
     background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    surface = Color.White,       // Màu nền của các Card (vé)
+    onSurface = Color.Black      // Màu chữ trên các Card
 )
 
 @Composable
 fun MyEzTicketTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Bạn có thể tắt dynamicColor (màu theo hình nền) để app luôn giữ đúng màu thương hiệu
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    // Quyết định dùng bảng màu nào dựa trên chế độ máy
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography, // Kết nối với file Type.kt
         content = content
     )
 }

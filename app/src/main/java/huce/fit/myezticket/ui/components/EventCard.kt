@@ -1,47 +1,52 @@
 package huce.fit.myezticket.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage // Thư viện Coil bạn vừa Sync ở Bước 0
+import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
 import huce.fit.myezticket.data.model.Event
 
 @Composable
-fun EventCard(event: Event) {
-    // Card tạo khung bo góc và đổ bóng cho cái vé
+fun EventCard(
+    event: Event,
+    onEventClick: (String) -> Unit // Khai báo để nhận sự kiện click
+) {
     Card(
         modifier = Modifier
-            .width(180.dp)       // Độ rộng của thẻ (phù hợp để cuộn ngang)
-            .padding(8.dp),      // Khoảng cách giữa các thẻ
+            .width(280.dp)
+            .padding(8.dp)
+            .clickable { onEventClick(event.id) }, // BẮT SỰ KIỆN CLICK Ở ĐÂY
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        // Đã đổi sang màu của Theme (surface) thay vì Color.White
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            // 1. Ảnh Poster - Lấy từ link image_url trên Firebase
+            // 1. Ảnh Poster
             AsyncImage(
                 model = event.image_url,
                 contentDescription = event.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp), // Chiều cao ảnh (tỉ lệ dọc cho đẹp)
-                contentScale = ContentScale.Crop // Cắt ảnh cho vừa khung, không bị méo
+                    .height(150.dp),
+                contentScale = ContentScale.Crop
             )
 
             // 2. Nội dung chữ bên dưới ảnh
             Column(modifier = Modifier.padding(8.dp)) {
-                // Tên sự kiện - Bold và tối đa 1 dòng
+                // Tên sự kiện (Đổi màu chữ tự động theo Theme)
                 Text(
                     text = event.name,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     maxLines = 1,
@@ -50,18 +55,18 @@ fun EventCard(event: Event) {
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Giá vé - Màu đỏ nổi bật
+                // Giá vé (Đổi sang màu cảnh báo/error của Theme thay vì Color.Red cứng)
                 Text(
                     text = "${event.price} đ",
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
 
-                // Địa điểm - Chữ nhỏ hơn một chút
+                // Địa điểm (Đổi sang màu phụ/secondary của Theme thay vì Color.Gray cứng)
                 Text(
                     text = event.location,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -71,20 +76,3 @@ fun EventCard(event: Event) {
     }
 }
 
-
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun EventCardPreview() {
-    // Tạo một dữ liệu giả (Dummy Data) để xem trước
-    val dummyEvent = Event(
-        name = "Show ca nhạc mẫu",
-        price = 500000,
-        location = "Hà Nội",
-        image_url = "https://cdn-media.sforum.vn/storage/app/media/anh-dep-82.jpg"
-    )
-    EventCard(event = dummyEvent)
-}
