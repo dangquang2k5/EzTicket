@@ -111,18 +111,24 @@ fun EventDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // DỊCH NGÀY GIỜ TỪ FIREBASE SANG CHỮ
+                    val dateString = event.date?.toDate()?.let { date ->
+                        val formatter = java.text.SimpleDateFormat("HH:mm, dd 'Tháng' MM, yyyy", java.util.Locale.forLanguageTag("vi-VN"))
+                        formatter.format(date)
+                    } ?: "Đang cập nhật thời gian..."
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Schedule, contentDescription = "Time", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        // Hiển thị tạm thời, sau này sẽ format cái event.date (Timestamp) sau
-                        Text("20:00, 15 Tháng 5, 2026", fontSize = 14.sp)
+                        // Gọi biến dateString thay vì dòng chữ gõ cứng
+                        Text(text = dateString, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.LocationOn, contentDescription = "Location", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(event.location, fontSize = 14.sp)
+                        Text(text = event.location, fontSize = 14.sp)
                     }
                 }
             }
@@ -150,6 +156,93 @@ fun EventDetailScreen(
                 }
             }
 
+            //// Khối Lịch diễn và Thông tin vé
+// 2.5 Khối Lịch diễn và Thông tin vé
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Lịch diễn",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // DỊCH NGÀY GIỜ TỪ FIREBASE SANG CHỮ
+                    val dateString = event.date?.toDate()?.let { date ->
+                        val formatter = java.text.SimpleDateFormat("HH:mm, dd 'Tháng' MM, yyyy", java.util.Locale.forLanguageTag("vi-VN"))
+                        formatter.format(date)
+                    } ?: "Đang cập nhật thời gian..."
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp))
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(text = dateString, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Thông tin vé",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // ==========================================
+                    // DANH SÁCH VÉ: LOGIC TỰ ĐỘNG THEO SỐ LƯỢNG
+                    // ==========================================
+                    event.ticketTypes.forEach { ticket ->
+
+                        // App tự làm toán: Nếu số lượng <= 0 thì coi như đã hết vé
+                        val isSoldOut = ticket.quantity <= 0
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Tên vé (Sẽ tự động gạch ngang nếu isSoldOut = true)
+                            Text(
+                                text = ticket.name,
+                                fontSize = 14.sp,
+                                color = if (isSoldOut) Color.LightGray else Color.Gray,
+                                textDecoration = if (isSoldOut) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                            )
+
+                            // Giá tiền (Sẽ đổi thành chữ "Hết vé" màu đỏ nếu isSoldOut = true)
+                            if (isSoldOut) {
+                                Text(
+                                    text = "Hết vé",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else {
+                                Text(
+                                    text = "${ticket.price} đ",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
             // Khoảng trống dưới cùng để không bị thanh Bottom Bar che mất chữ
             Spacer(modifier = Modifier.height(20.dp))
         }
