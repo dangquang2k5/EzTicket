@@ -57,7 +57,7 @@ fun EventCard(
 
                 // Giá vé (Đổi sang màu cảnh báo/error của Theme thay vì Color.Red cứng)
                 Text(
-                    text = "${event.price} đ",
+                    text = "${event.minPrice} đ",
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp

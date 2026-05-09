@@ -4,26 +4,50 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 
 data class Event(
-    // 1. id này dùng để lưu cái mã Document ID loằng ngoằng của Firebase
     var id: String = "",
-
-    // 2. Các trường này PHẢI trùng tên 100% với trên Firebase Console
     val name: String = "",
-    val price: Long = 0,         // Trên Firebase là Number thì ở đây là Long
     val location: String = "",
-    val image_url: String = "", // Link ảnh poster
-    val date: Timestamp? = null, // Kiểu thời gian bạn vừa hỏi lúc nãy
+    val image_url: String = "",
     val description: String = "",
     val category: String = "",
     @get:PropertyName("isBanner")
     @set:PropertyName("isBanner")
     var isBanner: Boolean = false,
-    val ticketTypes: List<TicketType> = emptyList() // Danh sách các hạng vé
+    val organizerName: String = "",
+    val organizerLogo: String = "",
+
+    // ĐÃ SỬA: Thay ticketTypes thành schedules
+    val schedules: List<EventSchedule> = emptyList()
+){
+    // TỰ ĐỘNG TÍNH GIÁ THẤP NHẤT
+    val minPrice: Long
+        get() = schedules
+            .flatMap { it.ticketTypes } // Gom tất cả vé của các ngày lại thành 1 danh sách
+            .map { it.price }           // Chỉ lấy danh sách các mức giá
+            .minOfOrNull { it } ?: 0    // Tìm mức giá thấp nhất, nếu không có thì trả về 0
+
+    // Tự động lấy ngày hiển thị (Ngày đầu tiên + "và khác" nếu có nhiều ngày)
+    val displayDate: String
+        get() {
+            val sortedDates = schedules.mapNotNull { it.date?.toDate() }.sorted()
+            if (sortedDates.isEmpty()) return "Đang cập nhật..."
+
+            val formatter = java.text.SimpleDateFormat("HH:mm, dd/MM/yyyy", java.util.Locale("vi", "VN"))
+            val firstDate = formatter.format(sortedDates[0])
+
+            return if (sortedDates.size > 1) "$firstDate và khác" else firstDate
+        }
+
+}
+
+// THÊM MỚI: Class chứa ngày giờ của suất diễn và kho vé của ngày hôm đó
+data class EventSchedule(
+    val date: Timestamp? = null,
+    val ticketTypes: List<TicketType> = emptyList()
 )
 
-// Thêm class bổ trợ để quản lý loại vé
 data class TicketType(
     val name: String = "",
     val price: Long = 0,
-    val quantity: Int = 0 // Tự động báo hết vé nếu quantity = 0
+    val quantity: Int = 0
 )

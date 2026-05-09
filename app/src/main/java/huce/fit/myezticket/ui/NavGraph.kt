@@ -47,6 +47,7 @@ fun SetupNavGraph(
             event?.let {
                 EventDetailScreen(
                     event = it,
+                    allEvents = events, // THÊM ĐÚNG 1 DÒNG Này để lấy toàn bộ sự kiện sang trang eventdetailscreen
                     onBackClick = { navController.popBackStack() } // Quay lại trang trước
                 )
             }

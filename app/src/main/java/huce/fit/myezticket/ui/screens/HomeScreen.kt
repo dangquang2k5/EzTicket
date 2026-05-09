@@ -3,12 +3,19 @@ package huce.fit.myezticket.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import huce.fit.myezticket.data.FakeDataGenerator
 
 // Import ViewModel
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
@@ -55,6 +62,16 @@ fun HomeScreen(
                         onEventClick(eventId) // Chuyền ID lên cho NavGraph
                     }
                 )
+            }
+
+            Button(
+                onClick = {
+                    FakeDataGenerator.seedDataToFirebase()
+                },
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("BẤM 1 LẦN DUY NHẤT ĐỂ TẠO DATA", color = Color.White)
             }
         }
     }
