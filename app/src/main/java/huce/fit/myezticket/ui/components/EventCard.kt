@@ -14,17 +14,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.ui.tooling.preview.Preview
 import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.utils.formatVND
 
 @Composable
 fun EventCard(
     event: Event,
+    modifier: Modifier = Modifier.width(280.dp).padding(8.dp),
     onEventClick: (String) -> Unit // Khai báo để nhận sự kiện click
 ) {
     Card(
-        modifier = Modifier
-            .width(280.dp)
-            .padding(8.dp)
-            .clickable { onEventClick(event.id) }, // BẮT SỰ KIỆN CLICK Ở ĐÂY
+        modifier = modifier.clickable { onEventClick(event.id) },
         shape = RoundedCornerShape(12.dp),
         // Đã đổi sang màu của Theme (surface) thay vì Color.White
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -55,9 +54,9 @@ fun EventCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Giá vé (Đổi sang màu cảnh báo/error của Theme thay vì Color.Red cứng)
+                // ĐÃ SỬA: Gọi hàm .formatVND()
                 Text(
-                    text = "${event.minPrice} đ",
+                    text = "${event.minPrice.formatVND()}đ",
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp

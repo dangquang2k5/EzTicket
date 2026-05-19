@@ -25,6 +25,7 @@ object FakeDataGenerator {
                 description = "<b>Giới thiệu sự kiện:</b><br>Trải nghiệm âm nhạc đỉnh cao với hệ thống âm thanh, ánh sáng đẳng cấp quốc tế.",
                 category = "Âm nhạc",
                 isBanner = true,
+                isHot = true, // HIỂN THỊ CẢ LÊN BANNER LẪN MỤC ĐẶC BIỆT
                 organizerName = "Live Nation Vietnam",
                 organizerLogo = "https://ui-avatars.com/api/?name=LN&background=E8F5E9&color=4CAF50",
                 // MẢNG MỚI NÀY NÈ:

@@ -13,6 +13,11 @@ data class Event(
     @get:PropertyName("isBanner")
     @set:PropertyName("isBanner")
     var isBanner: Boolean = false,
+
+    @get:PropertyName("isHot")
+    @set:PropertyName("isHot")
+    var isHot: Boolean = false,
+
     val organizerName: String = "",
     val organizerLogo: String = "",
 

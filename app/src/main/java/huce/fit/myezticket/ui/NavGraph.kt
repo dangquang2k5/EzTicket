@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import huce.fit.myezticket.ui.screens.HomeScreen
 import huce.fit.myezticket.ui.screens.EventDetailScreen
+import huce.fit.myezticket.ui.screens.SearchScreen
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
 
 @Composable
@@ -29,7 +30,20 @@ fun SetupNavGraph(
                 onEventClick = { eventId ->
                     // Khi click vào vé, nhảy sang màn hình detail kèm theo ID
                     navController.navigate("detail_screen/$eventId")
+                },
+
+                onSearchClick = {
+                    navController.navigate("search_screen")
                 }
+            )
+        }
+
+        // 2. Màn hình Tìm kiếm riêng biệt (MỚI THÊM)
+        composable(route = "search_screen") {
+            SearchScreen(
+                eventViewModel = eventViewModel,
+                onBackClick = { navController.popBackStack() },
+                onEventClick = { eventId -> navController.navigate("detail_screen/$eventId") }
             )
         }
 

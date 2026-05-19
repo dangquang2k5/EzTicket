@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import huce.fit.myezticket.ui.components.EventCard
 import huce.fit.myezticket.ui.components.HtmlText
+import huce.fit.myezticket.utils.formatVND
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,9 +63,9 @@ fun EventDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column {currentSchedule
                         Text("Giá từ", fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary)
-                        Text(text = "${event.minPrice} đ", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.error)
+                        Text(text = "${event.minPrice.formatVND()}đ", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.error)
                     }
                     Button(
                         onClick = { /* Mở màn hình chọn ghế */ },
@@ -190,7 +191,7 @@ fun EventDetailScreen(
                             if (isSoldOut) {
                                 Text("Hết vé", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                             } else {
-                                Text("${ticket.price} đ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text("${ticket.price.formatVND()}đ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }

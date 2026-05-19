@@ -10,7 +10,8 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeHeader() {
+fun HomeHeader(onSearchClick: () -> Unit = {} // BỔ SUNG THAM SỐ NÀY
+ ) {
     TopAppBar(
         title = {
             Text(
@@ -20,7 +21,7 @@ fun HomeHeader() {
             )
         },
         actions = {
-            IconButton(onClick = { /* Xử lý tìm kiếm */ }) {
+            IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Default.Search, // ĐÃ SỬA LẠI THÀNH imageVector
                     contentDescription = "Search"
