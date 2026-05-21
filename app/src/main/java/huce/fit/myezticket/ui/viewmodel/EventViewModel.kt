@@ -40,11 +40,22 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedCategory = MutableStateFlow("Tất cả")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
-    // BỘ LỌC NGÀY
-    val dateFilters = listOf("Tất cả các ngày", "Hôm nay", "Tuần này", "Tháng này")
-    
-    private val _selectedDateFilter = MutableStateFlow("Tất cả các ngày")
-    val selectedDateFilter: StateFlow<String> = _selectedDateFilter.asStateFlow()
+    // BỘ LỌC KHOẢNG NGÀY
+    private val _selectedDateFrom = MutableStateFlow<String?>(null)
+    val selectedDateFrom: StateFlow<String?> = _selectedDateFrom.asStateFlow()
+
+    private val _selectedDateTo = MutableStateFlow<String?>(null)
+    val selectedDateTo: StateFlow<String?> = _selectedDateTo.asStateFlow()
+
+    // Lưu năm/tháng/ngày cho "từ ngày"
+    private var fromYear: Int = -1
+    private var fromMonth: Int = -1
+    private var fromDay: Int = -1
+
+    // Lưu năm/tháng/ngày cho "đến ngày"
+    private var toYear: Int = -1
+    private var toMonth: Int = -1
+    private var toDay: Int = -1
 
     init {
         loadEvents()
@@ -90,91 +101,71 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         applyFilters()
     }
 
-    fun onDateFilterSelect(dateFilter: String) {
-        _selectedDateFilter.value = dateFilter
+    /**
+     * Gọi khi người dùng chọn khoảng ngày từ... đến...
+     */
+    fun onDateRangeSelect(
+        fYear: Int, fMonth: Int, fDay: Int, formattedFrom: String,
+        tYear: Int, tMonth: Int, tDay: Int, formattedTo: String
+    ) {
+        fromYear = fYear; fromMonth = fMonth; fromDay = fDay
+        toYear = tYear; toMonth = tMonth; toDay = tDay
+        _selectedDateFrom.value = formattedFrom
+        // Nếu chỉ chọn 1 ngày (from == to) → không lưu dateTO để nhãn chip gọn hơn
+        _selectedDateTo.value = if (formattedFrom == formattedTo) null else formattedTo
+        applyFilters()
+    }
+
+    fun clearDateFilter() {
+        _selectedDateFrom.value = null
+        _selectedDateTo.value = null
+        fromYear = -1; fromMonth = -1; fromDay = -1
+        toYear = -1; toMonth = -1; toDay = -1
         applyFilters()
     }
 
     private fun applyFilters() {
         val query = _searchQuery.value
         val category = _selectedCategory.value
-        val dateFilter = _selectedDateFilter.value
 
         // Guard: nếu events chưa load, không làm gì
         if (_events.value.isEmpty()) return
 
-        val now = java.util.Calendar.getInstance()
-        val todayStart = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, 0)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
-        val todayEnd = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, 23)
-            set(java.util.Calendar.MINUTE, 59)
-            set(java.util.Calendar.SECOND, 59)
-        }.timeInMillis
-
-        // Start of week (Monday)
-        val weekStart = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.DAY_OF_WEEK, java.util.Calendar.MONDAY)
-            set(java.util.Calendar.HOUR_OF_DAY, 0)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
-        val weekEnd = java.util.Calendar.getInstance().apply {
-            timeInMillis = weekStart
-            add(java.util.Calendar.DAY_OF_YEAR, 6)
-            set(java.util.Calendar.HOUR_OF_DAY, 23)
-            set(java.util.Calendar.MINUTE, 59)
-            set(java.util.Calendar.SECOND, 59)
-        }.timeInMillis
-
-        // Start of month
-        val monthStart = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.DAY_OF_MONTH, 1)
-            set(java.util.Calendar.HOUR_OF_DAY, 0)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
-        val monthEnd = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.DAY_OF_MONTH, getActualMaximum(java.util.Calendar.DAY_OF_MONTH))
-            set(java.util.Calendar.HOUR_OF_DAY, 23)
-            set(java.util.Calendar.MINUTE, 59)
-            set(java.util.Calendar.SECOND, 59)
-        }.timeInMillis
+        // Tính mốc thời gian cho khoảng ngày được chọn
+        val hasDateRange = fromYear >= 0 && toYear >= 0
+        val rangeStart: Long
+        val rangeEnd: Long
+        if (hasDateRange) {
+            rangeStart = java.util.Calendar.getInstance().apply {
+                set(fromYear, fromMonth, fromDay, 0, 0, 0)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            rangeEnd = java.util.Calendar.getInstance().apply {
+                set(toYear, toMonth, toDay, 23, 59, 59)
+            }.timeInMillis
+        } else {
+            rangeStart = 0L
+            rangeEnd = Long.MAX_VALUE
+        }
 
         _filteredEvents.value = _events.value.filter { event ->
             val matchesQuery = event.name.contains(query, ignoreCase = true) ||
                     event.location.contains(query, ignoreCase = true)
             val matchesCategory = category == "Tất cả" || event.category == category
-            
-            val matchesDate = if (dateFilter == "Tất cả các ngày") {
-                true
-            } else {
-                // Wrap trong try-catch: tránh crash khi Timestamp từ Firebase bị lỗi
-                try {
-                    event.schedules.any { schedule ->
-                        val scheduleTime = schedule.date?.toDate()?.time ?: 0L
-                        when (dateFilter) {
-                            "Hôm nay" -> scheduleTime in todayStart..todayEnd
-                            "Tuần này" -> scheduleTime in weekStart..weekEnd
-                            "Tháng này" -> scheduleTime in monthStart..monthEnd
-                            else -> true
+
+            val matchesDate = when {
+                // Đã chọn khoảng ngày từ... đến...
+                hasDateRange -> {
+                    try {
+                        event.schedules.any { schedule ->
+                            val t = schedule.date?.toDate()?.time ?: return@any false
+                            t in rangeStart..rangeEnd
                         }
-                    }
-                } catch (e: Exception) {
-                    // Nếu Timestamp lỗi, bỏ qua filter ngày
-                    true
+                    } catch (e: Exception) { true }
                 }
+                else -> true
             }
-            
+
             matchesQuery && matchesCategory && matchesDate
         }
     }
@@ -193,7 +184,25 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     fun resetSearch() {
         _searchQuery.value = ""
         _selectedCategory.value = "Tất cả"
-        _selectedDateFilter.value = "Tất cả các ngày"
+        _selectedDateFrom.value = null
+        _selectedDateTo.value = null
+        fromYear = -1; fromMonth = -1; fromDay = -1
+        toYear = -1; toMonth = -1; toDay = -1
         _filteredEvents.value = _events.value
+    }
+
+    /**
+     * Được gọi từ NavGraph khi navigate sang SearchScreen kèm danh mục cụ thể
+     * (ví dụ: nhấn "Xem tất cả" từ HomeScreen).
+     * Reset mọi bộ lọc, sau đó set sẵn category đã chọn.
+     */
+    fun setInitialCategory(category: String) {
+        _searchQuery.value = ""
+        _selectedDateFrom.value = null
+        _selectedDateTo.value = null
+        fromYear = -1; fromMonth = -1; fromDay = -1
+        toYear = -1; toMonth = -1; toDay = -1
+        _selectedCategory.value = category
+        applyFilters()
     }
 }

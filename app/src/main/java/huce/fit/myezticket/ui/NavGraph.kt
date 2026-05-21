@@ -1,6 +1,7 @@
 package huce.fit.myezticket.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -31,15 +32,39 @@ fun SetupNavGraph(
                     // Khi click vào vé, nhảy sang màn hình detail kèm theo ID
                     navController.navigate("detail_screen/$eventId")
                 },
-
                 onSearchClick = {
                     navController.navigate("search_screen")
+                },
+                onSeeAllClick = { category ->
+                    // Encode category để tránh lỗi nếu có ký tự đặc biệt (& / space…)
+                    val encoded = java.net.URLEncoder.encode(category, "UTF-8")
+                    navController.navigate("search_screen/$encoded")
                 }
             )
         }
 
-        // 2. Màn hình Tìm kiếm riêng biệt (MỚI THÊM)
+        // 2a. Màn hình Tìm kiếm không có filter
         composable(route = "search_screen") {
+            LaunchedEffect(Unit) {
+                eventViewModel.resetSearch()
+            }
+            SearchScreen(
+                eventViewModel = eventViewModel,
+                onBackClick = { navController.popBackStack() },
+                onEventClick = { eventId -> navController.navigate("detail_screen/$eventId") }
+            )
+        }
+
+        // 2b. Màn hình Tìm kiếm với filter danh mục từ HomeScreen "Xem tất cả"
+        composable(
+            route = "search_screen/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val encoded = backStackEntry.arguments?.getString("category") ?: "Tất+cả"
+            val category = java.net.URLDecoder.decode(encoded, "UTF-8")
+            LaunchedEffect(category) {
+                eventViewModel.setInitialCategory(category)
+            }
             SearchScreen(
                 eventViewModel = eventViewModel,
                 onBackClick = { navController.popBackStack() },
@@ -61,10 +86,16 @@ fun SetupNavGraph(
             event?.let {
                 EventDetailScreen(
                     event = it,
-                    allEvents = events, // THÊM ĐÚNG 1 DÒNG Này để lấy toàn bộ sự kiện sang trang eventdetailscreen
-                    onBackClick = { navController.popBackStack() } // Quay lại trang trước
+                    allEvents = events,
+                    onBackClick = { navController.popBackStack() },
+                    onBuyTicketClick = {},
+                    onEventClick = { eventId ->
+                        navController.navigate("detail_screen/$eventId")
+                    }
                 )
             }
         }
+
+
     }
-}
+}
