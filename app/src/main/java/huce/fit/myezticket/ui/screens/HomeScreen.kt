@@ -46,6 +46,8 @@ fun HomeScreen(
     eventViewModel: EventViewModel = viewModel(),
     onEventClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
+    onMyTicketsClick: () -> Unit = {},
+    onSeeAllClick: (String) -> Unit = {},
 ) {
     val events       by eventViewModel.events.collectAsState()
     val bannerEvents by eventViewModel.bannerEvents.collectAsState()

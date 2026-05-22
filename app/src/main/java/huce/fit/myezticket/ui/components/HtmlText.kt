@@ -11,7 +11,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 fun HtmlText(html: String, modifier: Modifier = Modifier) {
     AndroidView(
-<<<<<<< HEAD
         modifier = modifier.fillMaxWidth(),
         factory = { context ->
             WebView(context).apply {
@@ -27,12 +26,12 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                     loadWithOverviewMode = false
                     defaultTextEncodingName = "UTF-8"
                 }
-                
+
                 // Ẩn thanh cuộn để Compose xử lý cuộn
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                
+
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
@@ -77,14 +76,8 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                 </body>
                 </html>
             """.trimIndent()
-            
+
             webView.loadDataWithBaseURL(null, styledHtml, "text/html", "UTF-8", null)
-=======
-        modifier = modifier,
-        factory = { context ->
-            TextView(context).apply {
-                setTextColor(Color.parseColor("#424242")) // Màu chữ xám đậm cho dễ nhìn
-                textSize = 14f
-                movementMethod = android.text.method.LinkMovementMethod.getInstance()
-            }
-        },
+        }
+    )
+}

@@ -25,33 +25,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-<<<<<<< HEAD
 import huce.fit.myezticket.ui.components.DateRangePickerDialog
 import huce.fit.myezticket.ui.components.EventCard
+import huce.fit.myezticket.ui.components.PickedDate
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
 import java.util.*
-=======
-import huce.fit.myezticket.ui.components.EventCard
-import huce.fit.myezticket.ui.viewmodel.EventViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun SearchScreen(
     eventViewModel: EventViewModel,
     onBackClick: () -> Unit,
     onEventClick: (String) -> Unit
 ) {
-<<<<<<< HEAD
-=======
-    // 1. Reset tìm kiếm mỗi khi vào màn hình
-    LaunchedEffect(Unit) {
-        eventViewModel.resetSearch()
-    }
-
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
     val searchQuery by eventViewModel.searchQuery.collectAsState()
     val filteredEvents by eventViewModel.filteredEvents.collectAsState()
     val recentSearches by eventViewModel.recentSearches.collectAsState()
     val categories by eventViewModel.categories.collectAsState()
     val selectedCategory by eventViewModel.selectedCategory.collectAsState()
-<<<<<<< HEAD
     val selectedDateFrom by eventViewModel.selectedDateFrom.collectAsState()
     val selectedDateTo by eventViewModel.selectedDateTo.collectAsState()
 
@@ -127,21 +118,10 @@ fun SearchScreen(
             )
         },
         containerColor = MaterialTheme.colorScheme.background
-=======
-    val selectedDateFilter by eventViewModel.selectedDateFilter.collectAsState()
-    val dateFilters = eventViewModel.dateFilters
-
-    var showCategoryMenu by remember { mutableStateOf(false) }
-    var showDateMenu by remember { mutableStateOf(false) }
-
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background // Đồng bộ màu nền với HomeScreen
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-<<<<<<< HEAD
                 .fillMaxSize(),
             contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp)
         ) {
@@ -293,111 +273,6 @@ fun SearchScreen(
                                 borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                                 selectedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                             ),
-=======
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp)
-        ) {
-            item {
-                // HEADER (Quay lại + Tiêu đề)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Tìm kiếm",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Ô NHẬP TÌM KIẾM
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { eventViewModel.onSearchQueryChange(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Nhập tên sự kiện, địa điểm...", color = Color.Gray) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            eventViewModel.addToRecentSearches(searchQuery)
-                        }
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = Color.Gray,
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // HÀNG BỘ LỌC
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Nút "Ngày"
-                    Box {
-                        SuggestionChip(
-                            onClick = { showDateMenu = true },
-                            icon = { Icon(Icons.Default.DateRange, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(16.dp)) },
-                            label = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(selectedDateFilter, color = MaterialTheme.colorScheme.onSurface)
-                                    Icon(Icons.Default.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurface)
-                                }
-                            },
-                            colors = SuggestionChipDefaults.suggestionChipColors(containerColor = MaterialTheme.colorScheme.surface),
-                            border = null,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        DropdownMenu(
-                            expanded = showDateMenu,
-                            onDismissRequest = { showDateMenu = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            dateFilters.forEach { dateFilter ->
-                                DropdownMenuItem(
-                                    text = { Text(dateFilter, color = MaterialTheme.colorScheme.onSurface) },
-                                    onClick = {
-                                        eventViewModel.onDateFilterSelect(dateFilter)
-                                        showDateMenu = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    // Nút "Bộ lọc" (Lọc theo thể loại)
-                    Box {
-                        SuggestionChip(
-                            onClick = { showCategoryMenu = true },
-                            icon = { Icon(Icons.Default.FilterList, null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(16.dp)) },
-                            label = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(selectedCategory, color = MaterialTheme.colorScheme.onSurface)
-                                    Icon(Icons.Default.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurface)
-                                }
-                            },
-                            colors = SuggestionChipDefaults.suggestionChipColors(containerColor = MaterialTheme.colorScheme.surface),
-                            border = null,
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                             shape = RoundedCornerShape(20.dp)
                         )
                         DropdownMenu(
@@ -407,7 +282,6 @@ fun SearchScreen(
                         ) {
                             categories.forEach { category ->
                                 DropdownMenuItem(
-<<<<<<< HEAD
                                     text = {
                                         Text(
                                             category,
@@ -418,9 +292,6 @@ fun SearchScreen(
                                                 FontWeight.Bold else FontWeight.Normal
                                         )
                                     },
-=======
-                                    text = { Text(category, color = MaterialTheme.colorScheme.onSurface) },
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                                     onClick = {
                                         eventViewModel.onCategorySelect(category)
                                         showCategoryMenu = false
@@ -434,7 +305,6 @@ fun SearchScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-<<<<<<< HEAD
             // ─── HIỂN THỊ KHI CHƯA CÓ BỘ LỌC NÀO ─────────────────────────────
             if (searchQuery.isEmpty() && selectedCategory == "Tất cả" && !hasDateFilter) {
                 // Lịch sử "Gần đây"
@@ -447,21 +317,12 @@ fun SearchScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-=======
-            // HIỂN THỊ KHI CHƯA NHẬP TÌM KIẾM VÀ CHƯA CÓ LỌC
-            if (searchQuery.isEmpty() && selectedCategory == "Tất cả" && selectedDateFilter == "Tất cả các ngày") {
-                // Lịch sử "Gần đây"
-                if (recentSearches.isNotEmpty()) {
-                    item {
-                        Text("Gần đây", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 18.sp)
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     items(recentSearches, key = { it }) { text ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-<<<<<<< HEAD
                                 .clickable {
                                     eventViewModel.onSearchQueryChange(text)
                                     eventViewModel.addToRecentSearches(text)
@@ -486,25 +347,11 @@ fun SearchScreen(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.07f)
                         )
-=======
-                                .clickable { 
-                                    eventViewModel.onSearchQueryChange(text)
-                                    eventViewModel.addToRecentSearches(text)
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.History, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = text, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp)
-                        }
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                     }
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
                 item {
-<<<<<<< HEAD
                     Text(
                         "Khám phá thể loại",
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -520,17 +367,6 @@ fun SearchScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         categoryList.chunked(2).forEach { rowItems ->
-=======
-                    // Khám phá thể loại (Lấy từ dữ liệu thực tế)
-                    Text("Khám phá thể loại", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Chia categories thành từng hàng 2 cột
-                    val categoryList = categories.filter { it != "Tất cả" }
-                    val chunkedCategories = categoryList.chunked(2)
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        chunkedCategories.forEach { rowItems ->
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -539,7 +375,6 @@ fun SearchScreen(
                                     Surface(
                                         modifier = Modifier
                                             .weight(1f)
-<<<<<<< HEAD
                                             .clip(RoundedCornerShape(12.dp))
                                             .clickable { eventViewModel.onCategorySelect(category) },
                                         shape = RoundedCornerShape(12.dp),
@@ -548,19 +383,10 @@ fun SearchScreen(
                                             1.dp,
                                             MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                                         )
-=======
-                                            .clickable {
-                                                eventViewModel.onCategorySelect(category)
-                                                eventViewModel.addToRecentSearches(category)
-                                            },
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.surface
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                                     ) {
                                         Text(
                                             text = category,
                                             color = MaterialTheme.colorScheme.onSurface,
-<<<<<<< HEAD
                                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.Medium
@@ -568,23 +394,11 @@ fun SearchScreen(
                                     }
                                 }
                                 if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f))
-=======
-                                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                }
-                                // Nếu hàng chỉ có 1 item, thêm Spacer để cân bằng
-                                if (rowItems.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                             }
                         }
                     }
                 }
             } else {
-<<<<<<< HEAD
                 // ─── HIỂN THỊ KẾT QUẢ TÌM KIẾM ─────────────────────────────────
                 item {
                     Row(
@@ -599,23 +413,12 @@ fun SearchScreen(
                             hasDateFilter -> "Sự kiện theo ngày"
                             else -> "Kết quả lọc"
                         }
-=======
-                // HIỂN THỊ KẾT QUẢ TÌM KIẾM
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        val titleText = if (searchQuery.isNotEmpty()) "Kết quả cho \"$searchQuery\"" else "Kết quả lọc"
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                         Text(
                             text = titleText,
                             color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-<<<<<<< HEAD
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
@@ -628,13 +431,6 @@ fun SearchScreen(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
-=======
-                        Text(
-                            text = "${filteredEvents.size} kết quả",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -647,7 +443,6 @@ fun SearchScreen(
                                 .padding(top = 60.dp),
                             contentAlignment = Alignment.Center
                         ) {
-<<<<<<< HEAD
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("😕", fontSize = 48.sp)
                                 Spacer(modifier = Modifier.height(12.dp))
@@ -684,30 +479,12 @@ fun SearchScreen(
                             }
                             if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f))
                         }
-=======
-                            Text("Không tìm thấy sự kiện nào phù hợp.", color = Color.Gray)
-                        }
-                    }
-                } else {
-                    items(filteredEvents, key = { it.id }) { event ->
-                        EventCard(
-                            event = event,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            onEventClick = {
-                                if (searchQuery.isNotBlank()) eventViewModel.addToRecentSearches(searchQuery)
-                                onEventClick(it)
-                            }
-                        )
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
                     }
                 }
             }
         }
     }
 }
-<<<<<<< HEAD
 
 // Helper: parse "dd/MM/yyyy" → PickedDate
 private fun parsePickedDate(formatted: String): PickedDate? {
@@ -720,5 +497,3 @@ private fun parsePickedDate(formatted: String): PickedDate? {
         PickedDate(year, month, day)
     } catch (e: Exception) { null }
 }
-=======
->>>>>>> 7b78929673373265cf8d4740a313e279a9d30c90
