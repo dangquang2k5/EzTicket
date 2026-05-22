@@ -11,6 +11,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 fun HtmlText(html: String, modifier: Modifier = Modifier) {
     AndroidView(
+<<<<<<< HEAD
         modifier = modifier.fillMaxWidth(),
         factory = { context ->
             WebView(context).apply {
@@ -19,7 +20,6 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                
                 settings.apply {
                     javaScriptEnabled = true
                     loadsImagesAutomatically = true
@@ -79,6 +79,12 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
             """.trimIndent()
             
             webView.loadDataWithBaseURL(null, styledHtml, "text/html", "UTF-8", null)
-        }
-    )
-}
+=======
+        modifier = modifier,
+        factory = { context ->
+            TextView(context).apply {
+                setTextColor(Color.parseColor("#424242")) // Màu chữ xám đậm cho dễ nhìn
+                textSize = 14f
+                movementMethod = android.text.method.LinkMovementMethod.getInstance()
+            }
+        },

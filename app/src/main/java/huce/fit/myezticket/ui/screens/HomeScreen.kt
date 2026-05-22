@@ -33,7 +33,6 @@ import kotlinx.coroutines.launch
 // item 2  = Sự kiện đặc biệt
 // item 3  = Âm nhạc
 // item 4  = Hội thảo & Khóa học
-// item 5  = Thể thao
 // item 6  = Khác
 // item 7  = Nút debug (tạm thời)
 
@@ -47,8 +46,6 @@ fun HomeScreen(
     eventViewModel: EventViewModel = viewModel(),
     onEventClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
-    onSeeAllClick: (category: String) -> Unit = {},
-    onMyTicketsClick: () -> Unit = {}
 ) {
     val events       by eventViewModel.events.collectAsState()
     val bannerEvents by eventViewModel.bannerEvents.collectAsState()
