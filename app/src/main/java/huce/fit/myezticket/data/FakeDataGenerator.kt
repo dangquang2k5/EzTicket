@@ -20,7 +20,8 @@ object FakeDataGenerator {
         val fakeEvents = listOf(
             Event(
                 name = "Liveshow: Chân Trời Rực Rỡ",
-                location = "Sân vận động Mỹ Đình, Hà Nội",
+                venueName = "Sân vận động Mỹ Đình",
+                address = "Hà Nội",
                 image_url = "https://images.unsplash.com/photo-1540039155732-6762b51cc2fb?q=80&w=800&auto=format&fit=crop",
                 description = "<b>Giới thiệu sự kiện:</b><br>Trải nghiệm âm nhạc đỉnh cao với hệ thống âm thanh, ánh sáng đẳng cấp quốc tế.",
                 category = "Âm nhạc",
@@ -33,17 +34,17 @@ object FakeDataGenerator {
                     EventSchedule(
                         date = createTimestamp(2026, 11, 20, 19, 30), // Lịch ngày 20
                         ticketTypes = listOf(
-                            TicketType("VVIP", 3500000, 50),
-                            TicketType("VIP", 1500000, 200),
-                            TicketType("Standard", 800000, 500)
+                            TicketType(name = "VVIP", price = 3500000L, originalPrice = 3500000L, quantity = 50),
+                            TicketType(name = "VIP", price = 1500000L, originalPrice = 1500000L, quantity = 200),
+                            TicketType(name = "Standard", price = 800000L, originalPrice = 800000L, quantity = 500)
                         )
                     ),
                     EventSchedule(
                         date = createTimestamp(2026, 11, 21, 19, 30), // Lịch ngày 21
                         ticketTypes = listOf(
-                            TicketType("VVIP", 3500000, 0), // Đã hết vé
-                            TicketType("VIP", 1500000, 150),
-                            TicketType("Standard", 800000, 400)
+                            TicketType(name = "VVIP", price = 3500000L, originalPrice = 3500000L, quantity = 0), // Đã hết vé
+                            TicketType(name = "VIP", price = 1500000L, originalPrice = 1500000L, quantity = 150),
+                            TicketType(name = "Standard", price = 800000L, originalPrice = 800000L, quantity = 400)
                         )
                     )
                 )

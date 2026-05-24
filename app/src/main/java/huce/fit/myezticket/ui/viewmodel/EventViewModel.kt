@@ -150,7 +150,8 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
         _filteredEvents.value = _events.value.filter { event ->
             val matchesQuery = event.name.contains(query, ignoreCase = true) ||
-                    event.location.contains(query, ignoreCase = true)
+                    event.venueName.contains(query, ignoreCase = true) ||
+                    event.address.contains(query, ignoreCase = true)
             val matchesCategory = category == "Tất cả" || event.category == category
 
             val matchesDate = when {

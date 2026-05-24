@@ -6,12 +6,13 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 fun HtmlText(html: String, modifier: Modifier = Modifier) {
     AndroidView(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().alpha(0.99f),
         factory = { context ->
             WebView(context).apply {
                 // Đảm bảo chiều cao bao bọc nội dung
