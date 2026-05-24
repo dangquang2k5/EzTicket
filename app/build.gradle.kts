@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    kotlin("kapt")
 
     // phan duoi nay la them de ket noi voi firebase
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
-
 }
 
 android {
@@ -90,4 +91,17 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Security Crypto (for encrypted shared preferences)
+    implementation(libs.androidx.security.crypto)
+
+    // Biometric
+    implementation(libs.androidx.biometric)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }

@@ -21,6 +21,7 @@ import huce.fit.myezticket.ui.screens.QuestionnaireScreen
 import huce.fit.myezticket.ui.screens.MyTicketsScreen
 import huce.fit.myezticket.ui.screens.PaymentMethodScreen
 import huce.fit.myezticket.ui.screens.parseSelectedTicketsArg
+import huce.fit.myezticket.ui.screens.LoginScreen
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
 import huce.fit.myezticket.ui.viewmodel.TicketViewModel
 
@@ -34,7 +35,7 @@ fun SetupNavGraph(
     // NavHost định nghĩa các "điểm đến" trong app
     NavHost(
         navController = navController,
-        startDestination = "home_screen", // Màn hình bắt đầu
+        startDestination = "login_screen", // Đã chuyển màn bắt đầu thành Login
         enterTransition = {
             slideInHorizontally(
                 initialOffsetX = { it },
@@ -60,6 +61,33 @@ fun SetupNavGraph(
             ) + fadeOut(animationSpec = tween(150))
         }
     ) {
+        // 0. Màn hình Đăng nhập
+        composable(route = "login_screen") {
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate("home_screen") {
+                        popUpTo("login_screen") { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register_screen")
+                },
+                onNavigateToForgotPassword = {
+                    // navController.navigate("forgot_password_screen")
+                }
+            )
+        }
+        
+        // 0.1 Màn hình Đăng ký
+        composable(route = "register_screen") {
+            huce.fit.myezticket.ui.screens.RegisterScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack("login_screen", inclusive = false)
+                }
+            )
+        }
+
+
         // 1. Màn hình Trang chủ
         composable(route = "home_screen") {
             HomeScreen(
