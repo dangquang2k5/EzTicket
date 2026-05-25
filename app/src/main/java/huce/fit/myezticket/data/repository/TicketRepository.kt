@@ -55,7 +55,7 @@ class TicketRepository {
                     "imageUrl" to event.image_url,
                     "orderCode" to orderCode,
                     "eventDate" to schedule?.date,
-                    "location" to event.location,
+                    "location" to "${event.venueName}, ${event.address}",
                     "ticketTypeName" to ticketName,
                     "quantity" to quantity,
                     "unitPrice" to unitPrice,

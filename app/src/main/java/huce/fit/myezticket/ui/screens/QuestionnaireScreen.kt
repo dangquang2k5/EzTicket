@@ -136,7 +136,7 @@ fun QuestionnaireScreen(
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.LocationOn, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                    Text(" ${event.location}", color = Color.Gray, fontSize = 14.sp)
+                    Text(" ${event.venueName}, ${event.address}", color = Color.Gray, fontSize = 14.sp)
                 }
 
                 Spacer(Modifier.height(24.dp))

@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt)
-    kotlin("kapt")
+    alias(libs.plugins.ksp)
+    id("com.google.dagger.hilt.android")
 
     // phan duoi nay la them de ket noi voi firebase
     // Add the Google services Gradle plugin
@@ -102,6 +102,6 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 }
