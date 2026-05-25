@@ -3,16 +3,21 @@ package huce.fit.myezticket.ui
 import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import androidx.lifecycle.viewmodel.compose.viewModel
+import huce.fit.myezticket.ui.components.HomeBottomNavigation
 import huce.fit.myezticket.ui.screens.HomeScreen
 import huce.fit.myezticket.ui.screens.EventDetailScreen
 import huce.fit.myezticket.ui.screens.SearchScreen
@@ -32,35 +37,72 @@ fun SetupNavGraph(
 ) {
     val ticketViewModel: TicketViewModel = viewModel()
 
-    // NavHost định nghĩa các "điểm đến" trong app
-    NavHost(
-        navController = navController,
-        startDestination = "login_screen", // Đã chuyển màn bắt đầu thành Login
-        enterTransition = {
-            slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(300)
-            ) + fadeIn(animationSpec = tween(300))
-        },
-        exitTransition = {
-            slideOutHorizontally(
-                targetOffsetX = { -it / 3 },
-                animationSpec = tween(300)
-            ) + fadeOut(animationSpec = tween(150))
-        },
-        popEnterTransition = {
-            slideInHorizontally(
-                initialOffsetX = { -it / 3 },
-                animationSpec = tween(300)
-            ) + fadeIn(animationSpec = tween(300))
-        },
-        popExitTransition = {
-            slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween(300)
-            ) + fadeOut(animationSpec = tween(150))
+    // Theo dõi màn hình hiện tại để hiển thị Bottom Navigation
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val showBottomBar = currentRoute in listOf("home_screen", "my_tickets_screen")
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                HomeBottomNavigation(
+                    selectedIndex = when (currentRoute) {
+                        "home_screen" -> 0
+                        "my_tickets_screen" -> 1
+                        else -> 0
+                    },
+                    onHomeClick = {
+                        if (currentRoute != "home_screen") {
+                            navController.navigate("home_screen") {
+                                popUpTo("home_screen") { inclusive = true }
+                            }
+                        }
+                    },
+                    onMyTicketsClick = {
+                        if (currentRoute != "my_tickets_screen") {
+                            navController.navigate("my_tickets_screen") {
+                                popUpTo("home_screen") { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
+                    onProfileClick = { /* Sẽ làm sau */ }
+                )
+            }
         }
-    ) {
+    ) { paddingValues ->
+        // NavHost định nghĩa các "điểm đến" trong app
+        NavHost(
+            navController = navController,
+            startDestination = "login_screen", // Đã chuyển màn bắt đầu thành Login
+            modifier = Modifier.padding(paddingValues),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it / 3 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(150))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it / 3 },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(150))
+            }
+        ) {
         // 0. Màn hình Đăng nhập
         composable(route = "login_screen") {
             LoginScreen(
@@ -288,4 +330,5 @@ fun SetupNavGraph(
             )
         }
     }
+}
 }

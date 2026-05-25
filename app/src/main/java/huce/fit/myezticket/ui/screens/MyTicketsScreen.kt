@@ -100,14 +100,6 @@ fun MyTicketsScreen(
                 Spacer(modifier = Modifier.height(6.dp))
             }
         },
-        bottomBar = {
-            HomeBottomNavigation(
-                selectedIndex = 1,
-                onHomeClick = onHomeClick,
-                onMyTicketsClick = { /* Đã ở trang này */ },
-                onProfileClick = { /* Sẽ làm sau */ }
-            )
-        },
         containerColor = Color.Black
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {

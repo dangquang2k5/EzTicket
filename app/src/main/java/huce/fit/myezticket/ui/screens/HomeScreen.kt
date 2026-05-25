@@ -78,15 +78,7 @@ fun HomeScreen(
     var selectedChipIndex by remember { mutableIntStateOf(-1) } // -1 = không chip nào được chọn
 
     Scaffold(
-        topBar  = { HomeHeader(onSearchClick = onSearchClick) },
-        bottomBar = {
-            HomeBottomNavigation(
-                selectedIndex = 0,
-                onHomeClick = { /* Đã ở trang chủ */ },
-                onMyTicketsClick = onMyTicketsClick,
-                onProfileClick = { /* Sẽ làm sau */ }
-            )
-        }
+        topBar  = { HomeHeader(onSearchClick = onSearchClick) }
     ) { paddingValues ->
         LazyColumn(
             state = listState,
