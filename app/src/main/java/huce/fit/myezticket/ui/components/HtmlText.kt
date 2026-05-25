@@ -20,7 +20,6 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                
                 settings.apply {
                     javaScriptEnabled = true
                     loadsImagesAutomatically = true
@@ -28,12 +27,10 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                     loadWithOverviewMode = false
                     defaultTextEncodingName = "UTF-8"
                 }
-                
                 // Ẩn thanh cuộn để Compose xử lý cuộn
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
@@ -78,7 +75,6 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                 </body>
                 </html>
             """.trimIndent()
-            
             webView.loadDataWithBaseURL(null, styledHtml, "text/html", "UTF-8", null)
         }
     )

@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    kotlin("kapt")
 
     // phan duoi nay la them de ket noi voi firebase
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
-
 }
 
 android {
@@ -46,6 +47,7 @@ dependencies {
     //them de ket noi voi firebase
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
+    implementation("com.google.firebase:firebase-database") // Dùng cho QuestionnaireScreen
 
     // 2. Thêm các thư viện cần thiết cho App bán vé
     implementation("com.google.firebase:firebase-analytics")
@@ -58,6 +60,7 @@ dependencies {
 
     // Thêm thư viện hỗ trợ load ảnh từ mạng cho Compose (Rất quan trọng)
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("com.google.zxing:core:3.5.3") // Dùng để tạo QR code trong PaymentMethodScreen
 
 // 4. Lifecycle & ViewModel cho Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
@@ -88,4 +91,17 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Security Crypto (for encrypted shared preferences)
+    implementation(libs.androidx.security.crypto)
+
+    // Biometric
+    implementation(libs.androidx.biometric)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }

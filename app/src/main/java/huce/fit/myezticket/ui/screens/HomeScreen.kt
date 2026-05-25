@@ -47,6 +47,7 @@ fun HomeScreen(
     eventViewModel: EventViewModel = viewModel(),
     onEventClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
+    onMyTicketsClick: () -> Unit = {},
     onSeeAllClick: (category: String) -> Unit = {}
 ) {
     val events       by eventViewModel.events.collectAsState()
@@ -78,7 +79,14 @@ fun HomeScreen(
 
     Scaffold(
         topBar  = { HomeHeader(onSearchClick = onSearchClick) },
-        bottomBar = { HomeBottomNavigation() }
+        bottomBar = {
+            HomeBottomNavigation(
+                selectedIndex = 0,
+                onHomeClick = { /* Đã ở trang chủ */ },
+                onMyTicketsClick = onMyTicketsClick,
+                onProfileClick = { /* Sẽ làm sau */ }
+            )
+        }
     ) { paddingValues ->
         LazyColumn(
             state = listState,

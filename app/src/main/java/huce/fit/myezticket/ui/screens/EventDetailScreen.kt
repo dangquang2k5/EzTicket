@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -43,15 +42,13 @@ import huce.fit.myezticket.ui.components.HtmlText
 import huce.fit.myezticket.utils.formatVND
 import kotlinx.coroutines.launch
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(
     event: Event,
     allEvents: List<Event>,
     onBackClick: () -> Unit,
-    onBuyTicketClick: (String) -> Unit = {},
+    onBuyTicketClick: (Int) -> Unit = {},
     onEventClick: (String) -> Unit = {}
 ) {
     val now = java.util.Date()
@@ -68,7 +65,6 @@ fun EventDetailScreen(
 
     // Trạng thái mở rộng phần giới thiệu
     var isDescExpanded by remember { mutableStateOf(false) }
-
 
     // ScrollState để cuộn đến phần lịch diễn
     val scrollState = rememberScrollState()
@@ -366,7 +362,7 @@ fun EventDetailScreen(
 
                                         // Nút mua vé ngay
                                         Button(
-                                            onClick = { onBuyTicketClick(event.id) },
+                                            onClick = { onBuyTicketClick(index) },
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary
                                             ),
