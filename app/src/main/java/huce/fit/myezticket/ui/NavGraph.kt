@@ -20,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.ui.components.HomeBottomNavigation
 import huce.fit.myezticket.ui.screens.HomeScreen
 import huce.fit.myezticket.ui.screens.EventDetailScreen
+import huce.fit.myezticket.ui.screens.FavoritesScreen
+import huce.fit.myezticket.ui.screens.NotificationScreen
 import huce.fit.myezticket.ui.screens.SearchScreen
 import huce.fit.myezticket.ui.screens.TicketSelectionScreen
 import huce.fit.myezticket.ui.screens.QuestionnaireScreen
@@ -28,13 +30,17 @@ import huce.fit.myezticket.ui.screens.PaymentMethodScreen
 import huce.fit.myezticket.ui.screens.parseSelectedTicketsArg
 import huce.fit.myezticket.ui.screens.LoginScreen
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
+import huce.fit.myezticket.ui.viewmodel.FavoriteViewModel
+import huce.fit.myezticket.ui.viewmodel.NotificationViewModel
 import huce.fit.myezticket.ui.viewmodel.TicketViewModel
 
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
     eventViewModel: EventViewModel = hiltViewModel(),
-    ticketViewModel: TicketViewModel = hiltViewModel()
+    ticketViewModel: TicketViewModel = hiltViewModel(),
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    notificationViewModel: NotificationViewModel = hiltViewModel()
 ) {
 
     // Theo dõi màn hình hiện tại để hiển thị Bottom Navigation
@@ -158,8 +164,9 @@ fun SetupNavGraph(
         composable(route = "home_screen") {
             HomeScreen(
                 eventViewModel = eventViewModel,
+                favoriteViewModel = favoriteViewModel,
+                notificationViewModel = notificationViewModel,
                 onEventClick = { eventId ->
-                    // Khi click vào vé, nhảy sang màn hình detail kèm theo ID
                     navController.navigate("detail_screen/$eventId")
                 },
                 onSearchClick = {
@@ -172,6 +179,12 @@ fun SetupNavGraph(
                 },
                 onMyTicketsClick = {
                     navController.navigate("my_tickets_screen")
+                },
+                onFavoriteClick = {
+                    navController.navigate("favorites_screen")
+                },
+                onNotificationClick = {
+                    navController.navigate("notifications_screen")
                 }
             )
         }
@@ -212,6 +225,7 @@ fun SetupNavGraph(
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId")
             val events by eventViewModel.events.collectAsState()
+            val favoriteIds by favoriteViewModel.favoriteIds.collectAsState()
 
             // Tìm sự kiện tương ứng trong danh sách để hiển thị
             val event = events.find { it.id == eventId }
@@ -226,9 +240,33 @@ fun SetupNavGraph(
                     },
                     onEventClick = { eventId ->
                         navController.navigate("detail_screen/$eventId")
-                    }
+                    },
+                    isFavorite = it.id in favoriteIds,
+                    onToggleFavorite = { id -> favoriteViewModel.toggleFavorite(id) }
                 )
             }
+        }
+
+        // 3b. Màn hình Yêu thích
+        composable(route = "favorites_screen") {
+            FavoritesScreen(
+                favoriteViewModel = favoriteViewModel,
+                onBackClick = { navController.popBackStack() },
+                onEventClick = { eventId ->
+                    navController.navigate("detail_screen/$eventId")
+                }
+            )
+        }
+
+        // 3c. Màn hình Thông báo
+        composable(route = "notifications_screen") {
+            NotificationScreen(
+                notificationViewModel = notificationViewModel,
+                onBackClick = { navController.popBackStack() },
+                onNotificationClick = { eventId ->
+                    navController.navigate("detail_screen/$eventId")
+                }
+            )
         }
 
         // 4. Màn hình Chọn số lượng vé

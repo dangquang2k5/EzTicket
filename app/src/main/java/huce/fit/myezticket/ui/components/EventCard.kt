@@ -2,13 +2,17 @@ package huce.fit.myezticket.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,7 +26,10 @@ import huce.fit.myezticket.utils.formatVND
 fun EventCard(
     event: Event,
     modifier: Modifier = Modifier.width(280.dp).padding(8.dp),
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    // Tùy chọn: hiển thị icon ❤️ nếu truyền vào
+    isFavorite: Boolean = false,
+    onFavoriteClick: ((String) -> Unit)? = null
 ) {
     Card(
         modifier = modifier.clickable { onEventClick(event.id) },
@@ -31,19 +38,64 @@ fun EventCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            // 1. Ảnh Poster
-            AsyncImage(
-                model = event.image_url,
-                contentDescription = event.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                contentScale = ContentScale.Crop
-            )
+            // 1. Ảnh Poster + nút ❤️ góc trên phải
+            Box {
+                AsyncImage(
+                    model = event.image_url,
+                    contentDescription = event.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Badge trạng thái sự kiện COMING_SOON
+                if (event.status == "COMING_SOON") {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(6.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFFF6F00)
+                    ) {
+                        Text(
+                            "Sắp mở bán 🔥",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Icon ❤️ — chỉ hiển thị khi có callback
+                if (onFavoriteClick != null) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .size(30.dp),
+                        shape = CircleShape,
+                        color = Color.Black.copy(alpha = 0.35f)
+                    ) {
+                        IconButton(
+                            onClick = { onFavoriteClick(event.id) },
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite
+                                              else Icons.Default.FavoriteBorder,
+                                contentDescription = if (isFavorite) "Bỏ yêu thích" else "Yêu thích",
+                                tint = if (isFavorite) Color(0xFFFF4081) else Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
             // 2. Nội dung chữ bên dưới ảnh
             Column(modifier = Modifier.padding(8.dp)) {
-                // Tên sự kiện
                 Text(
                     text = event.name,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -55,7 +107,6 @@ fun EventCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Giá: hiển thị "Từ X.XXXđ"
                 Text(
                     text = if (event.minPrice > 0) "Từ ${event.minPrice.formatVND()}đ" else "Miễn phí",
                     color = MaterialTheme.colorScheme.error,
@@ -65,7 +116,6 @@ fun EventCard(
 
                 Spacer(modifier = Modifier.height(2.dp))
 
-                // Ngày tháng (thay vì địa chỉ)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.CalendarMonth,

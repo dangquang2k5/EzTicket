@@ -2,10 +2,12 @@ package huce.fit.myezticket.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import huce.fit.myezticket.domain.model.Event
 import huce.fit.myezticket.domain.model.PurchasedTicket
+import huce.fit.myezticket.domain.repository.FavoriteRepository
 import huce.fit.myezticket.domain.repository.TicketRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TicketViewModel @Inject constructor(
-    private val repository: TicketRepository
+    private val repository: TicketRepository,
+    private val favoriteRepository: FavoriteRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
     private var listenerRegistration: ListenerRegistration? = null
 
@@ -73,7 +77,14 @@ class TicketViewModel @Inject constructor(
             _isSavingPayment.value = false
 
             result
-                .onSuccess { onSaved() }
+                .onSuccess {
+                    // Tự động xóa sự kiện khỏi yêu thích sau khi mua vé thành công
+                    val uid = auth.currentUser?.uid
+                    if (uid != null) {
+                        runCatching { favoriteRepository.removeFavorite(uid, event.id) }
+                    }
+                    onSaved()
+                }
                 .onFailure { exception ->
                     _paymentError.value = exception.message ?: "Không thể lưu vé lên Firebase"
                 }

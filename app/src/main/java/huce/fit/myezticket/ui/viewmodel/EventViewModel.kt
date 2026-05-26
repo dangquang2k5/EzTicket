@@ -12,8 +12,13 @@ import huce.fit.myezticket.domain.repository.EventRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val PAGE_SIZE = 10
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
@@ -33,6 +38,34 @@ class EventViewModel @Inject constructor(
 
     private val _filteredEvents = MutableStateFlow<List<Event>>(emptyList())
     val filteredEvents: StateFlow<List<Event>> = _filteredEvents.asStateFlow()
+
+    // ── PHÂN TRANG CHO SEARCH SCREEN ─────────────────────────────────────────
+    // Số lượng sự kiện đang được hiển thị (tăng dần theo trang)
+    private val _searchDisplayCount = MutableStateFlow(PAGE_SIZE)
+
+    // Danh sách sự kiện đã cắt theo trang — UI chỉ render phần này
+    val pagedFilteredEvents: StateFlow<List<Event>> = combine(
+        _filteredEvents,
+        _searchDisplayCount
+    ) { events, count ->
+        events.take(count)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
+
+    // True khi còn sự kiện chưa được hiển thị
+    val hasMoreSearchResults: StateFlow<Boolean> = combine(
+        _filteredEvents,
+        _searchDisplayCount
+    ) { events, count ->
+        events.size > count
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = false
+    )
 
     // LỊCH SỬ TÌM KIẾM ĐỘNG (Persistent)
     private val _recentSearches = MutableStateFlow<List<String>>(emptyList())
@@ -129,6 +162,13 @@ class EventViewModel @Inject constructor(
         applyFilters()
     }
 
+    // Load thêm PAGE_SIZE sự kiện tiếp theo cho SearchScreen
+    fun loadMoreSearchResults() {
+        if (_filteredEvents.value.size > _searchDisplayCount.value) {
+            _searchDisplayCount.value += PAGE_SIZE
+        }
+    }
+
     private fun applyFilters() {
         val query = _searchQuery.value
         val category = _selectedCategory.value
@@ -174,6 +214,8 @@ class EventViewModel @Inject constructor(
 
             matchesQuery && matchesCategory && matchesDate
         }
+        // Reset về trang đầu mỗi khi bộ lọc thay đổi
+        _searchDisplayCount.value = PAGE_SIZE
     }
 
     fun addToRecentSearches(query: String) {

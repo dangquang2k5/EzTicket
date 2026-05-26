@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,11 +41,25 @@ fun SearchScreen(
 ) {
     val searchQuery by eventViewModel.searchQuery.collectAsState()
     val filteredEvents by eventViewModel.filteredEvents.collectAsState()
+    val pagedFilteredEvents by eventViewModel.pagedFilteredEvents.collectAsState()
+    val hasMoreSearchResults by eventViewModel.hasMoreSearchResults.collectAsState()
     val recentSearches by eventViewModel.recentSearches.collectAsState()
     val categories by eventViewModel.categories.collectAsState()
     val selectedCategory by eventViewModel.selectedCategory.collectAsState()
     val selectedDateFrom by eventViewModel.selectedDateFrom.collectAsState()
     val selectedDateTo by eventViewModel.selectedDateTo.collectAsState()
+
+    // LazyListState để detect cuộn đến cuối
+    val listState = rememberLazyListState()
+
+    // Khi item cuối cùng đang hiển thị → load thêm
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.layoutInfo.totalItemsCount) {
+        val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        val totalItems = listState.layoutInfo.totalItemsCount
+        if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && hasMoreSearchResults) {
+            eventViewModel.loadMoreSearchResults()
+        }
+    }
 
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -120,6 +135,7 @@ fun SearchScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
@@ -455,7 +471,7 @@ fun SearchScreen(
                         }
                     }
                 } else {
-                    val eventRows = filteredEvents.chunked(2)
+                    val eventRows = pagedFilteredEvents.chunked(2)
                     items(eventRows) { rowItems ->
                         Row(
                             modifier = Modifier
@@ -478,6 +494,50 @@ fun SearchScreen(
                                 )
                             }
                             if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+
+                    // ─── LOADING INDICATOR khi còn data để load ───────────────────
+                    if (hasMoreSearchResults) {
+                        item(key = "loading_more") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        "Đang tải thêm...",
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                    )
+                                }
+                            }
+                        }
+                    } else if (pagedFilteredEvents.isNotEmpty()) {
+                        // Đã hiển thị hết toàn bộ kết quả
+                        item(key = "end_of_results") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "✓ Đã hiển thị tất cả ${filteredEvents.size} kết quả",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                                )
+                            }
                         }
                     }
                 }

@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.data.FakeDataGenerator
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
+import huce.fit.myezticket.ui.viewmodel.FavoriteViewModel
+import huce.fit.myezticket.ui.viewmodel.NotificationViewModel
 import huce.fit.myezticket.ui.components.BannerSlider
 import huce.fit.myezticket.ui.components.CategoryChipBar
 import huce.fit.myezticket.ui.components.CategoryChip
@@ -45,13 +47,26 @@ private const val IDX_OTHER      = 6
 @Composable
 fun HomeScreen(
     eventViewModel: EventViewModel = hiltViewModel(),
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    notificationViewModel: NotificationViewModel = hiltViewModel(),
     onEventClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onMyTicketsClick: () -> Unit = {},
-    onSeeAllClick: (category: String) -> Unit = {}
+    onSeeAllClick: (category: String) -> Unit = {},
+    onFavoriteClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {}
 ) {
     val events       by eventViewModel.events.collectAsState()
     val bannerEvents by eventViewModel.bannerEvents.collectAsState()
+    val unreadCount  by notificationViewModel.unreadCount.collectAsState()
+    val favoriteIds  by favoriteViewModel.favoriteIds.collectAsState()
+
+    // Cập nhật events vào FavoriteViewModel để check thông báo
+    LaunchedEffect(events) {
+        if (events.isNotEmpty()) {
+            favoriteViewModel.updateAllEvents(events)
+        }
+    }
 
     val listState  = rememberLazyListState()
     val coroutine  = rememberCoroutineScope()
@@ -78,7 +93,14 @@ fun HomeScreen(
     var selectedChipIndex by remember { mutableIntStateOf(-1) } // -1 = không chip nào được chọn
 
     Scaffold(
-        topBar  = { HomeHeader(onSearchClick = onSearchClick) }
+        topBar  = {
+            HomeHeader(
+                onSearchClick       = onSearchClick,
+                onFavoriteClick     = onFavoriteClick,
+                onNotificationClick = onNotificationClick,
+                unreadNotificationCount = unreadCount
+            )
+        }
     ) { paddingValues ->
         LazyColumn(
             state = listState,

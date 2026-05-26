@@ -17,6 +17,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
@@ -50,7 +52,9 @@ fun EventDetailScreen(
     allEvents: List<Event>,
     onBackClick: () -> Unit,
     onBuyTicketClick: (Int) -> Unit = {},
-    onEventClick: (String) -> Unit = {}
+    onEventClick: (String) -> Unit = {},
+    isFavorite: Boolean = false,
+    onToggleFavorite: ((String) -> Unit)? = null
 ) {
     val now = java.util.Date()
 
@@ -84,6 +88,19 @@ fun EventDetailScreen(
                     }
                 },
                 actions = {
+                    // Nút yêu thích
+                    if (onToggleFavorite != null) {
+                        IconButton(onClick = { onToggleFavorite(event.id) }) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite
+                                              else Icons.Default.FavoriteBorder,
+                                contentDescription = if (isFavorite) "Bỏ yêu thích" else "Yêu thích",
+                                tint = if (isFavorite) Color(0xFFFF4081)
+                                       else MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                    // Nút chia sẻ
                     IconButton(onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -504,11 +521,13 @@ fun EventDetailScreen(
                 }
             }
 
-            // ── Sự kiện liên quan ─────────────────────────────────────────
+            // ── Sự kiện liên quan (phân trang theo batch 4) ──────────────
             val relatedEvents = allEvents.filter { it.category == event.category && it.id != event.id }
             if (relatedEvents.isNotEmpty()) {
-                var showAllRelated by remember { mutableStateOf(false) }
-                val displayRelated = relatedEvents.take(if (showAllRelated) relatedEvents.size else 4)
+                // Số sự kiện liên quan đang hiển thị, tăng dần 4 mỗi lần nhấn "Xem thêm"
+                var relatedDisplayCount by remember { mutableStateOf(4) }
+                val displayRelated = relatedEvents.take(relatedDisplayCount)
+                val hasMoreRelated = relatedEvents.size > relatedDisplayCount
 
                 Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                     Text(
@@ -538,22 +557,36 @@ fun EventDetailScreen(
                         }
                     }
 
-                    // Nút "Xem thêm" / "Thu gọn" ở dưới
-                    if (relatedEvents.size > 4) {
+                    // Nút "Xem thêm" — chỉ hiện khi còn sự kiện chưa được hiển thị
+                    if (hasMoreRelated) {
                         TextButton(
-                            onClick = { showAllRelated = !showAllRelated },
+                            onClick = { relatedDisplayCount += 4 },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                         ) {
                             Text(
-                                text = if (showAllRelated) "Thu gọn" else "Xem thêm",
+                                text = "Xem thêm (${relatedEvents.size - relatedDisplayCount} sự kiện)",
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium
                             )
                             Icon(
-                                imageVector = if (showAllRelated) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                imageVector = Icons.Default.ExpandMore,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else if (relatedEvents.size > 4) {
+                        // Đã hiển thị hết — thông báo nhỏ
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "✓ Đã hiển thị tất cả ${relatedEvents.size} sự kiện liên quan",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
                             )
                         }
                     }
