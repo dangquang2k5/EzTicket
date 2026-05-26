@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.database.FirebaseDatabase
-import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.domain.model.Event
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

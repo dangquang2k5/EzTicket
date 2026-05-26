@@ -1,20 +1,25 @@
 package huce.fit.myezticket.ui.viewmodel
 
-import android.app.Application
-import android.content.Context
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import huce.fit.myezticket.data.model.Event
-import huce.fit.myezticket.data.repository.EventRepository
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import dagger.hilt.android.lifecycle.HiltViewModel
+import huce.fit.myezticket.domain.model.Event
+import huce.fit.myezticket.domain.repository.EventRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EventViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = EventRepository()
-    private val sharedPreferences = application.getSharedPreferences("ezticket_prefs", Context.MODE_PRIVATE)
+@HiltViewModel
+class EventViewModel @Inject constructor(
+    private val repository: EventRepository,
+    private val dataStore: DataStore<Preferences>
+) : ViewModel() {
 
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events.asStateFlow()
@@ -75,20 +80,20 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadRecentSearches() {
-        val savedSearches = sharedPreferences.getStringSet("recent_searches", emptySet())?.toList() ?: emptyList()
-        // SharedPreferences doesn't guarantee order for StringSet, so we might want a different approach 
-        // if order is critical, but for now we'll just load it. 
-        // A better way is a delimited string.
-        val orderedSearches = sharedPreferences.getString("recent_searches_list", "")
-            ?.split("|")
-            ?.filter { it.isNotBlank() } ?: emptyList()
-        _recentSearches.value = orderedSearches
+        viewModelScope.launch {
+            dataStore.data.collect { preferences ->
+                val orderedSearches = preferences[stringPreferencesKey("recent_searches_list")] ?: ""
+                _recentSearches.value = orderedSearches.split("|").filter { it.isNotBlank() }
+            }
+        }
     }
 
     private fun saveRecentSearches(list: List<String>) {
-        sharedPreferences.edit()
-            .putString("recent_searches_list", list.joinToString("|"))
-            .apply()
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[stringPreferencesKey("recent_searches_list")] = list.joinToString("|")
+            }
+        }
     }
 
     fun onSearchQueryChange(newQuery: String) {

@@ -6,7 +6,9 @@ import huce.fit.myezticket.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class RegisterUseCase(
+import javax.inject.Inject
+
+class RegisterUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
     operator fun invoke(

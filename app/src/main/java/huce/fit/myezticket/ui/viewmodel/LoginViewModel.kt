@@ -15,16 +15,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class LoginViewModel(
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val loginUseCase: LoginUseCase) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return LoginViewModel(loginUseCase) as T
-        }
-    }
 
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email.asStateFlow()

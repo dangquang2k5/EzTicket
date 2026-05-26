@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.domain.model.Event
 
 /**
  * Section hiển thị danh sách sự kiện theo danh mục.

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import huce.fit.myezticket.R // Đảm bảo import R của project để dùng đa ngôn ngữ
-import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.domain.model.Event
 
 @Composable
 fun SpecialEventSection(

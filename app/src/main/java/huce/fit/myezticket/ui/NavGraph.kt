@@ -16,7 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.ui.components.HomeBottomNavigation
 import huce.fit.myezticket.ui.screens.HomeScreen
 import huce.fit.myezticket.ui.screens.EventDetailScreen
@@ -33,9 +33,9 @@ import huce.fit.myezticket.ui.viewmodel.TicketViewModel
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    eventViewModel: EventViewModel
+    eventViewModel: EventViewModel = hiltViewModel(),
+    ticketViewModel: TicketViewModel = hiltViewModel()
 ) {
-    val ticketViewModel: TicketViewModel = viewModel()
 
     // Theo dõi màn hình hiện tại để hiển thị Bottom Navigation
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -77,30 +77,54 @@ fun SetupNavGraph(
         NavHost(
             navController = navController,
             startDestination = "login_screen", // Đã chuyển màn bắt đầu thành Login
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()),
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it },
-                    animationSpec = tween(300)
-                ) + fadeIn(animationSpec = tween(300))
+                val mainTabs = listOf("home_screen", "my_tickets_screen")
+                val isTabTransition = initialState.destination.route in mainTabs && targetState.destination.route in mainTabs
+                if (isTabTransition) {
+                    fadeIn(animationSpec = tween(250))
+                } else {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                }
             },
             exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { -it / 3 },
-                    animationSpec = tween(300)
-                ) + fadeOut(animationSpec = tween(150))
+                val mainTabs = listOf("home_screen", "my_tickets_screen")
+                val isTabTransition = initialState.destination.route in mainTabs && targetState.destination.route in mainTabs
+                if (isTabTransition) {
+                    fadeOut(animationSpec = tween(250))
+                } else {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 3 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(150))
+                }
             },
             popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { -it / 3 },
-                    animationSpec = tween(300)
-                ) + fadeIn(animationSpec = tween(300))
+                val mainTabs = listOf("home_screen", "my_tickets_screen")
+                val isTabTransition = initialState.destination.route in mainTabs && targetState.destination.route in mainTabs
+                if (isTabTransition) {
+                    fadeIn(animationSpec = tween(250))
+                } else {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 3 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                }
             },
             popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { it },
-                    animationSpec = tween(300)
-                ) + fadeOut(animationSpec = tween(150))
+                val mainTabs = listOf("home_screen", "my_tickets_screen")
+                val isTabTransition = initialState.destination.route in mainTabs && targetState.destination.route in mainTabs
+                if (isTabTransition) {
+                    fadeOut(animationSpec = tween(250))
+                } else {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(150))
+                }
             }
         ) {
         // 0. Màn hình Đăng nhập

@@ -3,16 +3,20 @@ package huce.fit.myezticket.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ListenerRegistration
-import huce.fit.myezticket.data.model.Event
-import huce.fit.myezticket.data.model.PurchasedTicket
-import huce.fit.myezticket.data.repository.TicketRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import huce.fit.myezticket.domain.model.Event
+import huce.fit.myezticket.domain.model.PurchasedTicket
+import huce.fit.myezticket.domain.repository.TicketRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TicketViewModel : ViewModel() {
-    private val repository = TicketRepository()
+@HiltViewModel
+class TicketViewModel @Inject constructor(
+    private val repository: TicketRepository
+) : ViewModel() {
     private var listenerRegistration: ListenerRegistration? = null
 
     private val _purchasedTickets = MutableStateFlow<List<PurchasedTicket>>(emptyList())

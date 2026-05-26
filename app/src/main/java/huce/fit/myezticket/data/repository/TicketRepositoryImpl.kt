@@ -3,15 +3,18 @@ package huce.fit.myezticket.data.repository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import huce.fit.myezticket.data.model.Event
-import huce.fit.myezticket.data.model.PurchasedTicket
+import huce.fit.myezticket.domain.model.Event
+import huce.fit.myezticket.domain.model.PurchasedTicket
+import huce.fit.myezticket.domain.repository.TicketRepository
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class TicketRepository {
-    private val db = FirebaseFirestore.getInstance()
+class TicketRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : TicketRepository {
     private val purchasedTicketsCollection = db.collection(COLLECTION_PURCHASED_TICKETS)
 
-    fun listenPurchasedTickets(
+    override fun listenPurchasedTickets(
         onTicketsChanged: (List<PurchasedTicket>) -> Unit,
         onError: (Exception) -> Unit
     ): ListenerRegistration {
@@ -33,7 +36,7 @@ class TicketRepository {
         }
     }
 
-    suspend fun createPurchasedTickets(
+    override suspend fun createPurchasedTickets(
         event: Event,
         scheduleIndex: Int,
         selectedTickets: Map<String, Int>,

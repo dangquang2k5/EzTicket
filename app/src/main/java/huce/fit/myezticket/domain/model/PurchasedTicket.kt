@@ -1,4 +1,4 @@
-package huce.fit.myezticket.data.model
+package huce.fit.myezticket.domain.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude

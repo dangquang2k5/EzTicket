@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.data.FakeDataGenerator
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
 import huce.fit.myezticket.ui.components.BannerSlider
@@ -44,7 +44,7 @@ private const val IDX_OTHER      = 6
 
 @Composable
 fun HomeScreen(
-    eventViewModel: EventViewModel = viewModel(),
+    eventViewModel: EventViewModel = hiltViewModel(),
     onEventClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onMyTicketsClick: () -> Unit = {},

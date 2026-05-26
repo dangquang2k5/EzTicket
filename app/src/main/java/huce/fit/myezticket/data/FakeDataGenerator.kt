@@ -3,9 +3,9 @@ package huce.fit.myezticket.data
 import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import huce.fit.myezticket.data.model.Event
-import huce.fit.myezticket.data.model.EventSchedule
-import huce.fit.myezticket.data.model.TicketType
+import huce.fit.myezticket.domain.model.Event
+import huce.fit.myezticket.domain.model.EventSchedule
+import huce.fit.myezticket.domain.model.TicketType
 import java.util.Calendar
 
 object FakeDataGenerator {

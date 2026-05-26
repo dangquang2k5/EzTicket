@@ -60,7 +60,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.domain.model.Event
 
 private data class PaymentMethod(
     val id: String,

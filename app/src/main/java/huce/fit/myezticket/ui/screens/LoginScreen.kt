@@ -23,31 +23,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.core.common.UiState
 import huce.fit.myezticket.ui.components.AuthTextField
 import huce.fit.myezticket.ui.components.PrimaryButton
 import huce.fit.myezticket.ui.viewmodel.LoginViewModel
-import huce.fit.myezticket.data.repository.AuthRepositoryImpl
-import huce.fit.myezticket.domain.usecase.LoginUseCase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun LoginScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
-    viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModel.Factory(
-            LoginUseCase(
-                AuthRepositoryImpl(
-                    FirebaseAuth.getInstance(),
-                    FirebaseFirestore.getInstance()
-                )
-            )
-        )
-    )
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()

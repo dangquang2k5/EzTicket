@@ -18,6 +18,9 @@ import huce.fit.myezticket.ui.SetupNavGraph
 import huce.fit.myezticket.ui.theme.MyEzTicketTheme
 import huce.fit.myezticket.ui.viewmodel.EventViewModel // THIẾU DÒNG NÀY TRONG CODE CỦA BẠN
 
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,19 +30,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyEzTicketTheme {
-                // 1. CHÍNH LÀ 2 DÒNG NÀY: Khởi tạo biến trước khi gọi
                 val navController = rememberNavController()
-                val eventViewModel: EventViewModel = viewModel()
 
                 // 2. Surface làm nền cho toàn bộ ứng dụng
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 3. Bây giờ mới truyền 2 biến đã khởi tạo vào NavGraph
                     SetupNavGraph(
-                        navController = navController,
-                        eventViewModel = eventViewModel
+                        navController = navController
                     )
                 }
             }

@@ -22,29 +22,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import huce.fit.myezticket.core.common.UiState
-import huce.fit.myezticket.data.repository.AuthRepositoryImpl
-import huce.fit.myezticket.domain.usecase.RegisterUseCase
+import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.ui.components.AuthTextField
 import huce.fit.myezticket.ui.components.PrimaryButton
 import huce.fit.myezticket.ui.viewmodel.RegisterViewModel
+import huce.fit.myezticket.core.common.UiState
 
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
-    viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModel.Factory(
-            RegisterUseCase(
-                AuthRepositoryImpl(
-                    FirebaseAuth.getInstance(),
-                    FirebaseFirestore.getInstance()
-                )
-            )
-        )
-    )
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
     val phone by viewModel.phone.collectAsState()
     val email by viewModel.email.collectAsState()

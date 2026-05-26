@@ -26,8 +26,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import huce.fit.myezticket.data.model.Event
-import huce.fit.myezticket.data.model.PurchasedTicket
+import huce.fit.myezticket.domain.model.Event
+import huce.fit.myezticket.domain.model.PurchasedTicket
 import huce.fit.myezticket.ui.components.HomeBottomNavigation
 import java.text.SimpleDateFormat
 import java.util.Locale

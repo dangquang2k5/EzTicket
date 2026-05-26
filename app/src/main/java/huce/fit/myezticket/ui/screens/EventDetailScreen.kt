@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import huce.fit.myezticket.data.model.Event
+import huce.fit.myezticket.domain.model.Event
 import huce.fit.myezticket.ui.components.EventCard
 import huce.fit.myezticket.ui.components.HtmlText
 import huce.fit.myezticket.utils.formatVND
