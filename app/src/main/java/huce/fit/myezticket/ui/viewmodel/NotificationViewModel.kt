@@ -38,23 +38,51 @@ class NotificationViewModel @Inject constructor(
         val uid = uid
         if (uid.isEmpty()) return
         viewModelScope.launch {
-            repository.getNotifications(uid).collect { list ->
-                _notifications.value = list
+            try {
+                repository.getNotifications(uid).collect { list ->
+                    _notifications.value = list
+                }
+            } catch (e: Exception) {
+                // Primary query th\u1ea5t b\u1ea1i (th\u01b0\u1eddng do thi\u1ebfu Firestore composite index)
+                // \u2192 fallback v\u1ec1 query \u0111\u01a1n gi\u1ea3n (ch\u1ec9 l\u1ecdc theo uid, sort trong code)
+                android.util.Log.w(
+                    "NotificationViewModel",
+                    "Primary query failed, using fallback: ${e.message}"
+                )
+                repository.getNotificationsSimple(uid).collect { list ->
+                    _notifications.value = list
+                }
             }
         }
     }
 
     fun markAsRead(notificationId: String) {
+        // Cập nhật UI ngay lập tức (optimistic update)
+        _notifications.value = _notifications.value.map { notif ->
+            if (notif.id == notificationId) notif.copy(isRead = true) else notif
+        }
+        // Đồng bộ lên Firestore
         viewModelScope.launch {
-            repository.markAsRead(notificationId)
+            try {
+                repository.markAsRead(notificationId)
+            } catch (e: Exception) {
+                android.util.Log.e("NotificationVM", "markAsRead failed: ${e.message}")
+            }
         }
     }
 
     fun markAllAsRead() {
         val uid = uid
         if (uid.isEmpty()) return
+        // Cập nhật UI ngay lập tức (optimistic update)
+        _notifications.value = _notifications.value.map { it.copy(isRead = true) }
+        // Đồng bộ lên Firestore
         viewModelScope.launch {
-            repository.markAllAsRead(uid)
+            try {
+                repository.markAllAsRead(uid)
+            } catch (e: Exception) {
+                android.util.Log.e("NotificationVM", "markAllAsRead failed: ${e.message}")
+            }
         }
     }
 }

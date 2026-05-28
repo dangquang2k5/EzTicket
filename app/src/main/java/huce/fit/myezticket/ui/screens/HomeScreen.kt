@@ -192,25 +192,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── Item 7: Nút debug (tạm thời – xóa khi production) ──────────
-            item(key = "debug_btn") {
-                Button(
-                    onClick = { FakeDataGenerator.seedDataToFirebase() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "BẤM 1 LẦN DUY NHẤT ĐỂ TẠO DATA",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+
         }
     }
 }

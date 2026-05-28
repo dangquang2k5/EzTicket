@@ -220,11 +220,17 @@ private fun NotificationItem(
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            // Thời gian tạo thông báo
-            notification.createdAt?.toDate()?.let { date ->
+            // Hiển thị thời gian diễn ra sự kiện (nếu có), fallback về thời gian thông báo
+            val displayTime = notification.eventDate ?: notification.createdAt
+            displayTime?.toDate()?.let { date ->
                 val fmt = SimpleDateFormat("HH:mm, dd/MM/yyyy", Locale("vi", "VN"))
+                val displayText = if (notification.eventDate != null) {
+                    "Thời gian sự kiện: ${fmt.format(date)}"
+                } else {
+                    fmt.format(date)
+                }
                 Text(
-                    text = fmt.format(date),
+                    text = displayText,
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )

@@ -21,7 +21,9 @@ data class Event(
     @set:PropertyName("isHot")
     var isHot: Boolean = false,
 
-    val isVisible: Boolean = true,
+    @get:PropertyName("isVisible")
+    @set:PropertyName("isVisible")
+    var isVisible: Boolean = true,
     val status: String = "AVAILABLE",
     val organizerName: String = "",
     val organizerLogo: String = "",
@@ -59,6 +61,8 @@ data class TicketType(
     val name: String = "",
     val price: Long = 0,
     val originalPrice: Long = 0,
-    val isVisible: Boolean = true,
+    @get:PropertyName("isVisible")
+    @set:PropertyName("isVisible")
+    var isVisible: Boolean = true,
     val quantity: Int = 0
 )

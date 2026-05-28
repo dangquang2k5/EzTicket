@@ -1,21 +1,33 @@
 package huce.fit.myezticket.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import huce.fit.myezticket.ui.components.EventCard
+import coil.compose.AsyncImage
+import huce.fit.myezticket.domain.model.Event
 import huce.fit.myezticket.ui.viewmodel.FavoriteViewModel
+import huce.fit.myezticket.utils.formatVND
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,18 +36,50 @@ fun FavoritesScreen(
     onBackClick: () -> Unit,
     onEventClick: (String) -> Unit
 ) {
+    val pagedFavoriteEvents by favoriteViewModel.pagedFavoriteEvents.collectAsState()
     val favoriteEvents by favoriteViewModel.favoriteEvents.collectAsState()
     val favoriteIds by favoriteViewModel.favoriteIds.collectAsState()
+    val hasMoreFavorites by favoriteViewModel.hasMoreFavorites.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    // Load thêm khi cuộn gần cuối
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.layoutInfo.totalItemsCount) {
+        val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        val totalItems = listState.layoutInfo.totalItemsCount
+        if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && hasMoreFavorites) {
+            favoriteViewModel.loadMoreFavorites()
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Sự kiện yêu thích",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "Sự kiện yêu thích",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        if (favoriteEvents.isNotEmpty()) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "${favoriteEvents.size}",
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -85,26 +129,213 @@ fun FavoritesScreen(
                 }
             }
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(favoriteEvents, key = { it.id }) { event ->
-                    EventCard(
+                items(pagedFavoriteEvents, key = { it.id }) { event ->
+                    FavoriteEventCard(
                         event = event,
-                        modifier = Modifier.fillMaxWidth(),
-                        onEventClick = onEventClick,
                         isFavorite = event.id in favoriteIds,
-                        onFavoriteClick = { eventId ->
-                            favoriteViewModel.toggleFavorite(eventId)
-                        }
+                        onEventClick = onEventClick,
+                        onFavoriteClick = { favoriteViewModel.toggleFavorite(it) }
                     )
                 }
+
+                // Loading indicator
+                if (hasMoreFavorites) {
+                    item(key = "loading_more") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Đang tải thêm...",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+                    }
+                } else if (pagedFavoriteEvents.isNotEmpty()) {
+                    item(key = "end_of_results") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "✓ Đã hiển thị tất cả ${favoriteEvents.size} sự kiện yêu thích",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteEventCard(
+    event: Event,
+    isFavorite: Boolean,
+    onEventClick: (String) -> Unit,
+    onFavoriteClick: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEventClick(event.id) },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+        ) {
+            // ── Ảnh sự kiện (bên trái) ──────────────────────────────────────
+            Box(modifier = Modifier.size(110.dp)) {
+                AsyncImage(
+                    model = event.image_url,
+                    contentDescription = event.name,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Nút ❤️ toggle yêu thích
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .size(28.dp),
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.35f)
+                ) {
+                    IconButton(
+                        onClick = { onFavoriteClick(event.id) },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite
+                                          else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Bỏ yêu thích" else "Yêu thích",
+                            tint = if (isFavorite) Color(0xFFFF4081) else Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                // Badge COMING_SOON
+                if (event.status == "COMING_SOON") {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(4.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0xFFFF6F00)
+                    ) {
+                        Text(
+                            "Sắp mở bán",
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            // ── Thông tin sự kiện (bên phải) ─────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Tên sự kiện
+                Text(
+                    text = event.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Ngày
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = event.displayDate,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                // Địa chỉ
+                if (event.address.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = event.address,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 11.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Giá vé
+                Text(
+                    text = if (event.minPrice > 0) "Từ ${event.minPrice.formatVND()}đ" else "Miễn phí",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
             }
         }
     }
