@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,16 +31,6 @@ import huce.fit.myezticket.ui.components.HomeBottomNavigation
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
-// ===== MODEL VÉ BÁN LẠI =====
-data class ResellTicket(
-    val id: String = "",
-    val eventName: String = "",
-    val imageUrl: String = "",
-    val price: Long = 0,
-    val status: String = "Đang bán"
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTicketsScreen(
@@ -51,17 +40,13 @@ fun MyTicketsScreen(
     onEventClick: (String) -> Unit = {},
     onHomeClick: () -> Unit = {}
 ) {
-    // Tab lớn: 0 = Vé đã mua, 1 = Vé bán lại (BỎ Thẻ thành viên theo yêu cầu)
-    var selectedTab by remember { mutableIntStateOf(0) }
     var selectedStatusFilter by remember { mutableStateOf("Tất cả") }
-
-    val resellTickets = remember { emptyList<ResellTicket>() }
 
     Scaffold(
         topBar = {
             Column(
                 modifier = Modifier
-                    .background(Color(0xFF00C853))
+                    .background(MaterialTheme.colorScheme.primary)
                     .statusBarsPadding()
             ) {
                 Box(
@@ -77,44 +62,44 @@ fun MyTicketsScreen(
                         fontSize = 20.sp
                     )
                 }
-                // 2 tabs lớn: Vé đã mua | Vé bán lại
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    contentAlignment = Alignment.Center
                 ) {
-                    MainTabChip(
-                        label = "Vé đã mua",
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        modifier = Modifier.weight(1f)
-                    )
-                    MainTabChip(
-                        label = "Vé bán lại",
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        modifier = Modifier.weight(1f)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.White.copy(alpha = 0.16f))
+                            .border(1.dp, Color.White.copy(alpha = 0.32f), RoundedCornerShape(50))
+                            .padding(horizontal = 28.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Vé đã mua",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(6.dp))
             }
         },
-        containerColor = Color.Black
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            when (selectedTab) {
-                0 -> PurchasedTicketsTab(
-                    tickets = purchasedTickets,
-                    allEvents = allEvents,
-                    isLoading = isTicketsLoading,
-                    selectedStatus = selectedStatusFilter,
-                    onStatusChange = { selectedStatusFilter = it },
-                    onEventClick = onEventClick,
-                    onHomeClick = onHomeClick
-                )
-                1 -> ResellTicketsTab(resellTickets = resellTickets)
-            }
+            PurchasedTicketsTab(
+                tickets = purchasedTickets,
+                allEvents = allEvents,
+                isLoading = isTicketsLoading,
+                selectedStatus = selectedStatusFilter,
+                onStatusChange = { selectedStatusFilter = it },
+                onEventClick = onEventClick,
+                onHomeClick = onHomeClick
+            )
         }
     }
 }
@@ -136,7 +121,7 @@ private fun PurchasedTicketsTab(
     val pastTickets = tickets.filter { !it.isUpcoming }
     val currentTickets = if (upcomingSelected) upcomingTickets else pastTickets
 
-    val statusFilters = listOf("Tất cả", "Thành công", "Đang xử lý", "Đã hủy")
+    val statusFilters = listOf("Tất cả", "Thành công", "Đã hủy")
     val filteredByStatus = if (selectedStatus == "Tất cả") currentTickets
     else currentTickets.filter { normalizeTicketStatus(it.status) == normalizeTicketStatus(selectedStatus) }
 
@@ -145,7 +130,7 @@ private fun PurchasedTicketsTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -166,7 +151,7 @@ private fun PurchasedTicketsTab(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = Color(0xFF00C853))
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             if (currentTickets.isNotEmpty()) {
@@ -199,7 +184,7 @@ private fun PurchasedTicketsTab(
                             item {
                                 Text(
                                     "Có thể bạn cũng thích",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
@@ -236,9 +221,9 @@ private fun PurchasedTicketsTab(
                                     OutlinedButton(
                                         onClick = onHomeClick,
                                         shape = RoundedCornerShape(50),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
-                                        Text("Xem thêm sự kiện", color = Color.White)
+                                        Text("Xem thêm sự kiện", color = MaterialTheme.colorScheme.primary)
                                     }
                                 }
                             }
@@ -252,45 +237,18 @@ private fun PurchasedTicketsTab(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFF00C853))
+                            .background(Color(0xFFE8F5E9))
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Nhận vé thành công", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text("Nhận vé thành công", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
                     }
                 }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(filteredByStatus) { ticket -> PurchasedTicketItem(ticket = ticket) }
                 }
-            }
-        }
-    }
-}
-
-// ===== TAB VÉ BÁN LẠI =====
-@Composable
-private fun ResellTicketsTab(resellTickets: List<ResellTicket>) {
-    val resellStatusTabs = listOf("Đang bán", "Chờ thanh toán", "Đã thanh toán", "Đã huỷ")
-    var selectedResellStatus by remember { mutableStateOf("Đang bán") }
-    val filtered = resellTickets.filter { it.status == selectedResellStatus }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().background(Color.Black).padding(vertical = 4.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            items(resellStatusTabs) { tab ->
-                ResellSubTab(tab, selectedResellStatus == tab) { selectedResellStatus = tab }
-            }
-        }
-        if (filtered.isEmpty()) {
-            EmptyTicketState("Bạn chưa có vé nào được đăng bán!", "Bán lại vé") {}
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(filtered) { ticket -> ResellTicketItem(ticket = ticket) }
             }
         }
     }
@@ -307,7 +265,7 @@ private fun FilterEmptyState(message: String) {
     ) {
         Text(
             message,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.secondary,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -326,19 +284,24 @@ private fun EmptyTicketState(message: String, buttonLabel: String, onButtonClick
                 .clip(CircleShape)
                 .background(
                     brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(Color(0xFFE07850), Color(0xFFD4603A), Color(0xFFC8B89A))
+                        colors = listOf(Color(0xFFE8F5E9), Color(0xFFC8E6C9), Color(0xFFA5D6A7))
                     )
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text("👨‍🚀", fontSize = 72.sp)
+            Icon(
+                imageVector = Icons.Default.ConfirmationNumber,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(84.dp)
+            )
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Text(message, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(message, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Spacer(modifier = Modifier.height(20.dp))
         Button(
             onClick = onButtonClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.padding(horizontal = 32.dp)
         ) {
@@ -352,28 +315,38 @@ private fun EmptyTicketState(message: String, buttonLabel: String, onButtonClick
 private fun PurchasedTicketItem(ticket: PurchasedTicket) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0E0E0)),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(
-                modifier = Modifier.padding(12.dp).width(52.dp),
+                modifier = Modifier
+                    .width(58.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFE8F5E9))
+                    .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(ticket.dayText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                Text(ticket.monthText, color = Color.White, fontSize = 11.sp, lineHeight = 16.sp)
-                Text(ticket.yearText, color = Color.White, fontSize = 11.sp)
+                Text(ticket.dayText, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text(ticket.monthText, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, lineHeight = 16.sp, textAlign = TextAlign.Center)
+                Text(ticket.yearText, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
             }
-            Box(modifier = Modifier.width(3.dp).fillMaxHeight().background(Color.Black))
-            Column(modifier = Modifier.weight(1f).padding(12.dp)) {
-                Text(ticket.eventName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(modifier = Modifier.width(1.dp).height(86.dp).background(Color(0xFFE0E0E0)))
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(ticket.eventName, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     StatusBadge(ticket.status, when (normalizeTicketStatus(ticket.status)) {
-                        "Thành công" -> Color(0xFF00C853)
+                        "Thành công" -> MaterialTheme.colorScheme.primary
                         "Đang xử lý" -> Color(0xFFFF9100)
                         "Đã hủy" -> Color(0xFFFF1744)
-                        else -> Color.Gray
+                        else -> MaterialTheme.colorScheme.secondary
                     })
                     val ticketTypeLabel = if (ticket.quantity > 1) {
                         "${ticket.ticketTypeName} x${ticket.quantity}"
@@ -383,34 +356,10 @@ private fun PurchasedTicketItem(ticket: PurchasedTicket) {
                     if (ticketTypeLabel.isNotBlank()) StatusBadge(ticketTypeLabel, Color(0xFF00838F))
                 }
                 Spacer(modifier = Modifier.height(6.dp))
-                Text("⊟  Order code: ${ticket.orderCode}", color = Color.Gray, fontSize = 12.sp)
-                Text("🕐  ${ticket.timeText}", color = Color.Gray, fontSize = 12.sp)
-                Text("📍  ${ticket.location}", color = Color.Gray, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text("⊟  Order code: ${ticket.orderCode}", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp)
+                Text("🕐  ${ticket.timeText}", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp)
+                Text("📍  ${ticket.location}", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
-        }
-    }
-}
-
-// ===== ITEM VÉ BÁN LẠI =====
-@Composable
-private fun ResellTicketItem(ticket: ResellTicket) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = ticket.imageUrl, contentDescription = null,
-                modifier = Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(ticket.eventName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text("${formatMyTicketPrice(ticket.price)} đ", color = Color(0xFF00C853), fontWeight = FontWeight.Bold)
-            }
-            StatusBadge(ticket.status, Color(0xFF00C853))
         }
     }
 }
@@ -429,33 +378,13 @@ private fun SuggestedEventCard(event: Event, onClick: () -> Unit) {
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(5.dp))
-        Text(event.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text("Từ ${formatMyTicketPrice(event.minPrice)} đ", color = Color(0xFF00C853), fontWeight = FontWeight.Bold, fontSize = 11.sp)
-        if (firstDate.isNotBlank()) Text(firstDate, color = Color.Gray, fontSize = 10.sp)
+        Text(event.name, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text("Từ ${formatMyTicketPrice(event.minPrice)} đ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+        if (firstDate.isNotBlank()) Text(firstDate, color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp)
     }
 }
 
 // ===== UI COMPONENTS =====
-
-@Composable
-private fun MainTabChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(if (selected) Color.White else Color.Transparent)
-            .border(1.dp, if (selected) Color.White else Color(0xAAFFFFFF), RoundedCornerShape(50))
-            .clickable { onClick() }
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            label,
-            color = if (selected) Color(0xFF00C853) else Color.White,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            fontSize = 14.sp
-        )
-    }
-}
 
 @Composable
 private fun SubTabText(
@@ -470,21 +399,16 @@ private fun SubTabText(
             .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(label, color = if (selected) Color.White else Color.Gray, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, fontSize = 15.sp)
+        Text(
+            label,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center
+        )
         if (selected) {
             Spacer(modifier = Modifier.height(3.dp))
-            Box(modifier = Modifier.width(40.dp).height(2.dp).background(Color(0xFF00C853), RoundedCornerShape(1.dp)))
-        }
-    }
-}
-
-@Composable
-private fun ResellSubTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Column(modifier = Modifier.clickable { onClick() }.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, color = if (selected) Color.White else Color.Gray, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, fontSize = 13.sp)
-        if (selected) {
-            Spacer(modifier = Modifier.height(3.dp))
-            Box(modifier = Modifier.height(2.dp).width(label.length.dp * 7).background(Color(0xFF00C853), RoundedCornerShape(1.dp)))
+            Box(modifier = Modifier.width(40.dp).height(2.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(1.dp)))
         }
     }
 }
@@ -494,19 +418,40 @@ private fun StatusFilterChip(label: String, selected: Boolean, onClick: () -> Un
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (selected) Color(0xFF00C853) else Color(0xFF1E1E1E))
-            .border(1.dp, if (selected) Color(0xFF00C853) else Color(0xFF444444), RoundedCornerShape(50))
+            .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+            .border(1.dp, if (selected) MaterialTheme.colorScheme.primary else Color(0xFFE0E0E0), RoundedCornerShape(50))
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .defaultMinSize(minWidth = 74.dp, minHeight = 32.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(label, color = if (selected) Color.White else Color.Gray, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+        Text(
+            label,
+            color = if (selected) Color.White else MaterialTheme.colorScheme.secondary,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 @Composable
 private fun StatusBadge(label: String, color: Color, textColor: Color = Color.White) {
-    Box(modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(color).padding(horizontal = 6.dp, vertical = 2.dp)) {
-        Text(label, color = textColor, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(color)
+            .defaultMinSize(minHeight = 22.dp)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            label,
+            color = textColor,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

@@ -27,6 +27,7 @@ import huce.fit.myezticket.ui.screens.TicketSelectionScreen
 import huce.fit.myezticket.ui.screens.QuestionnaireScreen
 import huce.fit.myezticket.ui.screens.MyTicketsScreen
 import huce.fit.myezticket.ui.screens.PaymentMethodScreen
+import huce.fit.myezticket.ui.screens.PaymentSuccessScreen
 import huce.fit.myezticket.ui.screens.parseSelectedTicketsArg
 import huce.fit.myezticket.ui.screens.LoginScreen
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
@@ -361,7 +362,7 @@ fun SetupNavGraph(
                             orderCode = orderCode,
                             paymentMethod = paymentMethod
                         ) {
-                            navController.navigate("my_tickets_screen") {
+                            navController.navigate("payment_success_screen/${Uri.encode(orderCode)}") {
                                 popUpTo("home_screen")
                                 launchSingleTop = true
                             }
@@ -369,6 +370,29 @@ fun SetupNavGraph(
                     }
                 )
             }
+        }
+
+        // 6b. Màn hình thông báo thanh toán thành công
+        composable(
+            route = "payment_success_screen/{orderCode}",
+            arguments = listOf(navArgument("orderCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val orderCode = backStackEntry.arguments?.getString("orderCode")?.let(Uri::decode).orEmpty()
+            PaymentSuccessScreen(
+                orderCode = orderCode,
+                onViewTicketsClick = {
+                    navController.navigate("my_tickets_screen") {
+                        popUpTo("home_screen")
+                        launchSingleTop = true
+                    }
+                },
+                onHomeClick = {
+                    navController.navigate("home_screen") {
+                        popUpTo("home_screen") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
 
         // 7. Màn hình Vé của tôi

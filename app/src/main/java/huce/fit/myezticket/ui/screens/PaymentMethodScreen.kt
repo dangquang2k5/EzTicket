@@ -52,6 +52,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -215,19 +216,16 @@ fun PaymentMethodScreen(
             Spacer(Modifier.height(10.dp))
 
             paymentMethods.forEach { method ->
+                val isSelected = selectedMethod?.id == method.id
                 PaymentMethodItem(
                     method = method,
-                    selected = selectedMethod?.id == method.id,
+                    selected = isSelected,
+                    qrPayload = if (isSelected) qrPayload else null,
                     onClick = { selectedMethod = method }
                 )
                 Spacer(Modifier.height(10.dp))
             }
 
-            Spacer(Modifier.height(8.dp))
-            PaymentQrCard(
-                selectedMethod = selectedMethod,
-                qrPayload = qrPayload
-            )
             if (paymentError != null) {
                 Spacer(Modifier.height(12.dp))
                 Text(
@@ -238,6 +236,93 @@ fun PaymentMethodScreen(
                 )
             }
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+fun PaymentSuccessScreen(
+    orderCode: String,
+    onViewTicketsClick: () -> Unit,
+    onHomeClick: () -> Unit
+) {
+    Scaffold(containerColor = Color.Black) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(112.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF00C853).copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF00C853),
+                    modifier = Modifier.size(68.dp)
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+            Text(
+                "Thanh toán thành công",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Vé của bạn đã được lưu vào mục Vé đã mua.",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(20.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Mã đơn hàng", color = Color.Gray, fontSize = 13.sp)
+                    Spacer(Modifier.height(4.dp))
+                    Text(orderCode, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = onViewTicketsClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853))
+            ) {
+                Text("Xem vé đã mua", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+            Spacer(Modifier.height(10.dp))
+            Button(
+                onClick = onHomeClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
+            ) {
+                Text("Về trang chủ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
         }
     }
 }
@@ -294,6 +379,7 @@ private fun OrderSummaryCard(
 private fun PaymentMethodItem(
     method: PaymentMethod,
     selected: Boolean,
+    qrPayload: String?,
     onClick: () -> Unit
 ) {
     Card(
@@ -304,76 +390,51 @@ private fun PaymentMethodItem(
         border = BorderStroke(1.dp, if (selected) Color(0xFF00C853) else Color(0xFF333333)),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(method.accentColor.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
+        Column {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(method.icon, null, tint = method.accentColor, modifier = Modifier.size(24.dp))
-            }
-            Spacer(Modifier.size(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(method.title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                Text(method.subtitle, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (selected) {
-                Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF00C853), modifier = Modifier.size(22.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun PaymentQrCard(
-    selectedMethod: PaymentMethod?,
-    qrPayload: String?
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                selectedMethod?.title ?: "Chưa chọn phương thức",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-            Spacer(Modifier.height(12.dp))
-            if (selectedMethod != null && qrPayload != null) {
-                PaymentQrCode(
-                    payload = qrPayload,
-                    modifier = Modifier
-                        .fillMaxWidth(0.72f)
-                        .aspectRatio(1f)
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "Mã QR ${selectedMethod.title}",
-                    color = selectedMethod.accentColor,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-            } else {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.72f)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White.copy(alpha = 0.08f)),
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(method.accentColor.copy(alpha = 0.16f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("QR", color = Color.Gray, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    Icon(method.icon, null, tint = method.accentColor, modifier = Modifier.size(24.dp))
+                }
+                Spacer(Modifier.size(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(method.title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(method.subtitle, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (selected) {
+                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF00C853), modifier = Modifier.size(22.dp))
+                }
+            }
+            if (selected && qrPayload != null) {
+                HorizontalDivider(color = Color(0xFF2F3B33))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    PaymentQrCode(
+                        payload = qrPayload,
+                        modifier = Modifier
+                            .fillMaxWidth(0.64f)
+                            .aspectRatio(1f)
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Quét mã QR ${method.title}",
+                        color = method.accentColor,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

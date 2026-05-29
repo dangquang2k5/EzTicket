@@ -101,7 +101,7 @@ fun QuestionnaireScreen(
                             db.push().setValue(orderData)
                             onConfirmClick(trimmedPhone)
                         },
-                        enabled = phoneNumber.trim().length >= 10 && !isTimeExpired,
+                        enabled = phoneNumber.length == 10 && !isTimeExpired,
                         modifier = Modifier.width(160.dp).height(50.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853))
@@ -153,9 +153,12 @@ fun QuestionnaireScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phoneNumber,
-                            onValueChange = { phoneNumber = it },
+                            onValueChange = { input ->
+                                phoneNumber = input.filter { it.isDigit() }.take(10)
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color(0xFF4CAF50),
                                 unfocusedBorderColor = Color.Gray,
