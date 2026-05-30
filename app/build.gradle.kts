@@ -50,7 +50,6 @@ dependencies {
     implementation("com.google.firebase:firebase-database") // Dùng cho QuestionnaireScreen
 
     // 2. Thêm các thư viện cần thiết cho App bán vé
-    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore") // Lưu dữ liệu sự kiện/vé
     implementation("com.google.firebase:firebase-auth")      // Đăng ký/Đăng nhập
     implementation("com.google.firebase:firebase-storage")   // Lưu ảnh poster

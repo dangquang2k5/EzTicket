@@ -31,4 +31,22 @@ interface AuthRepository {
 
     // Logout
     fun logout()
+
+    // Get current user details from Firestore
+    suspend fun getCurrentUserDetail(): Resource<User>
+
+    // Update user profile in Firestore
+    suspend fun updateUserProfile(user: User): Resource<Unit>
+
+    // Upload avatar to Firebase Storage and return URL
+    suspend fun uploadAvatar(bytes: ByteArray): Resource<String>
+
+    // Delete current account from Auth & Firestore
+    suspend fun deleteAccount(): Resource<Unit>
+
+    // Change password for current user
+suspend fun changePassword(currentPassword: String, newPassword: String): Resource<Unit>
+
+// Update only notification settings in Firestore
+    suspend fun updateNotificationSettings(booking: Boolean, promo: Boolean, system: Boolean): Resource<Unit>
 }
