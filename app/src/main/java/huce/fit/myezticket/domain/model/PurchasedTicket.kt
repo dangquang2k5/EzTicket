@@ -23,7 +23,8 @@ data class PurchasedTicket(
     val paymentMethod: String = "",
     val scheduleIndex: Int = 0,
     val createdAt: Timestamp? = null,
-    val expiresAt: Timestamp? = null
+    val expiresAt: Timestamp? = null,
+    val eventEndDate: Timestamp? = null
 ) {
     @get:Exclude
     val isUpcoming: Boolean
@@ -68,7 +69,11 @@ data class PurchasedTicket(
 
     @get:Exclude
     val timeText: String
-        get() = eventDate?.toDate()?.let { TIME_FORMAT.format(it) }.orEmpty()
+        get() = eventDate?.toDate()?.let { sDate ->
+            val start = TIME_FORMAT.format(sDate)
+            val end = eventEndDate?.toDate()?.let { TIME_FORMAT.format(it) }
+            if (end != null) "$start - $end" else start
+        } ?: ""
 
     @get:Exclude
     val isPendingPayment: Boolean

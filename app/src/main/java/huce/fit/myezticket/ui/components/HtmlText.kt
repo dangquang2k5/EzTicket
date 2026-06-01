@@ -21,7 +21,7 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
                 settings.apply {
-                    javaScriptEnabled = true
+                    javaScriptEnabled = false // Vô hiệu hóa JavaScript giúp nạp WebView nhanh và nhẹ hơn nhiều lần
                     loadsImagesAutomatically = true
                     useWideViewPort = false
                     loadWithOverviewMode = false
@@ -75,7 +75,13 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
                 </body>
                 </html>
             """.trimIndent()
-            webView.loadDataWithBaseURL(null, styledHtml, "text/html", "UTF-8", null)
+            
+            // Tối ưu hóa: Chỉ gọi loadData khi nội dung HTML thực sự thay đổi
+            // Tránh việc reload lại webview liên tục khi màn hình Compose bị recompose
+            if (webView.tag != styledHtml) {
+                webView.tag = styledHtml
+                webView.loadDataWithBaseURL(null, styledHtml, "text/html", "UTF-8", null)
+            }
         }
     )
 }

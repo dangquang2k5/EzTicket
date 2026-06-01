@@ -43,5 +43,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // Tối ưu hóa: Khởi tạo trước WebView ở chế độ chạy ngầm sau khi màn hình chính vẽ xong
+        // Việc này giúp tránh bị khựng/delay ở màn hình chi tiết sự kiện do nạp thư viện Chromium
+        window.decorView.post {
+            try {
+                android.webkit.WebView(applicationContext)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

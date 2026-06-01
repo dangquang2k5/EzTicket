@@ -717,10 +717,6 @@ private fun DetailRow(label: String, value: String, isBoldValue: Boolean = false
 // ===== SUGGESTED EVENT CARD =====
 @Composable
 private fun SuggestedEventCard(event: Event, onClick: () -> Unit) {
-    val dateFormatter = remember { SimpleDateFormat("dd 'Tháng' MM, yyyy", Locale("vi", "VN")) }
-    val firstDate = remember(event) {
-        event.schedules.mapNotNull { it.date?.toDate() }.minOrNull()?.let { dateFormatter.format(it) } ?: ""
-    }
     Column(modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
         AsyncImage(
             model = event.image_url, contentDescription = event.name,
@@ -730,7 +726,7 @@ private fun SuggestedEventCard(event: Event, onClick: () -> Unit) {
         Spacer(modifier = Modifier.height(5.dp))
         Text(event.name, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text("Từ ${formatMyTicketPrice(event.minPrice)} đ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-        if (firstDate.isNotBlank()) Text(firstDate, color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp)
+        if (event.displayDate.isNotBlank()) Text(event.displayDate, color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp)
     }
 }
 

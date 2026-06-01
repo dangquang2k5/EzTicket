@@ -41,19 +41,33 @@ data class Event(
     @get:Exclude
     val displayDate: String
         get() {
-            val sortedDates = schedules.mapNotNull { it.date?.toDate() }.sorted()
-            if (sortedDates.isEmpty()) return "Đang cập nhật..."
-
-            val formatter = java.text.SimpleDateFormat("HH:mm, dd/MM/yyyy", java.util.Locale("vi", "VN"))
-            val firstDate = formatter.format(sortedDates[0])
-
-            return if (sortedDates.size > 1) "$firstDate và khác" else firstDate
+            val firstSchedule = schedules.minByOrNull { it.date?.toDate()?.time ?: Long.MAX_VALUE }
+            val startDate = firstSchedule?.date?.toDate()
+            val endDate = firstSchedule?.endDate?.toDate()
+            
+            if (startDate == null) return "Đang cập nhật..."
+            
+            val timeFmt = java.text.SimpleDateFormat("HH:mm", java.util.Locale("vi", "VN"))
+            val dateFmt = java.text.SimpleDateFormat("dd 'Tháng' MM, yyyy", java.util.Locale("vi", "VN"))
+            
+            val startStr = timeFmt.format(startDate)
+            val endStr = endDate?.let { timeFmt.format(it) }
+            val dateStr = dateFmt.format(startDate)
+            
+            val firstDisplay = if (endStr != null) {
+                "$startStr - $endStr, $dateStr"
+            } else {
+                "$startStr, $dateStr"
+            }
+            
+            return if (schedules.size > 1) "$firstDisplay và khác" else firstDisplay
         }
 }
 
 // Class chứa ngày giờ của suất diễn và kho vé của ngày hôm đó
 data class EventSchedule(
     val date: Timestamp? = null,
+    val endDate: Timestamp? = null,
     val ticketTypes: List<TicketType> = emptyList()
 )
 

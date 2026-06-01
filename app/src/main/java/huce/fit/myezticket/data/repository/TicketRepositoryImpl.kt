@@ -171,6 +171,7 @@ class TicketRepositoryImpl @Inject constructor(
                         "orderCode" to orderCode,
                         "ticketCode" to document.id,
                         "eventDate" to schedule?.date,
+                        "eventEndDate" to schedule?.endDate,
                         "location" to "${event.venueName}, ${event.address}",
                         "ticketTypeName" to ticketName,
                         "quantity" to 1,

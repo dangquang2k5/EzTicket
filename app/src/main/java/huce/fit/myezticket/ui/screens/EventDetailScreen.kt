@@ -56,7 +56,32 @@ fun EventDetailScreen(
     isFavorite: Boolean = false,
     onToggleFavorite: ((String) -> Unit)? = null
 ) {
-    val now = java.util.Date()
+    val now = remember { java.util.Date() }
+
+    // Kiểm tra xem tất cả các suất diễn đã bắt đầu chưa (startDate < now)
+    val allSchedulesPast = remember(event.schedules, now) {
+        event.schedules.isNotEmpty() && event.schedules.all { schedule ->
+            val sDate = schedule.date?.toDate()
+            sDate != null && sDate.before(now)
+        }
+    }
+
+    // Xác định trạng thái và text hiển thị cho Bottom Bar chính
+    val bottomBarButtonText = remember(allSchedulesPast, event.schedules, now) {
+        if (!allSchedulesPast) {
+            "Mua vé ngay"
+        } else {
+            // Lấy suất diễn kết thúc muộn nhất
+            val lastSchedule = event.schedules.maxByOrNull { it.endDate?.toDate()?.time ?: it.date?.toDate()?.time ?: 0L }
+            val endDate = lastSchedule?.endDate?.toDate()
+            
+            if (endDate != null && now.before(endDate)) {
+                "Đang diễn ra"
+            } else {
+                "Đã kết thúc"
+            }
+        }
+    }
 
     // Tìm index của suất diễn gần thời điểm hiện tại nhất (ưu tiên sắp diễn, nếu không thì lấy cuối cùng)
     val defaultExpandedIndex = remember(event.schedules) {
@@ -138,14 +163,22 @@ fun EventDetailScreen(
                     }
                     Button(
                         onClick = {
-                            coroutineScope.launch {
-                                scrollState.animateScrollTo(scheduleOffsetPx)
+                            if (!allSchedulesPast) {
+                                coroutineScope.launch {
+                                    scrollState.animateScrollTo(scheduleOffsetPx)
+                                }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        enabled = !allSchedulesPast,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = Color.Gray,
+                            contentColor = Color.White,
+                            disabledContentColor = Color.LightGray
+                        ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Mua vé ngay", fontWeight = FontWeight.Bold)
+                        Text(bottomBarButtonText, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -175,14 +208,7 @@ fun EventDetailScreen(
                     Text(text = event.name, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    val dateString = if (event.schedules.isNotEmpty()) {
-                        val sortedDates = event.schedules.mapNotNull { it.date?.toDate() }.sorted()
-                        if (sortedDates.isNotEmpty()) {
-                            val fmt = java.text.SimpleDateFormat("HH:mm, dd/MM/yyyy", java.util.Locale("vi", "VN"))
-                            val first = fmt.format(sortedDates[0])
-                            if (sortedDates.size > 1) "$first và khác" else first
-                        } else "Đang cập nhật lịch diễn..."
-                    } else "Đang cập nhật lịch diễn..."
+                    val dateString = event.displayDate
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Schedule, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
@@ -236,18 +262,20 @@ fun EventDetailScreen(
                         cleanText.length > 400
                     }
 
-                    // Hiển thị thực sự
-                    if (needsExpand && !isDescExpanded) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                        ) {
-                            HtmlText(html = descContent, modifier = Modifier.fillMaxWidth())
-                        }
-                    } else {
-                        HtmlText(html = descContent, modifier = Modifier.fillMaxWidth())
-                    }
+                    // Tối ưu hóa Compose: Giữ nguyên duy nhất một node HtmlText để tái sử dụng WebView cũ
+                    // Chỉ thay đổi Modifier chiều cao, tránh việc huỷ và tạo lại WebView khi click "Xem thêm"
+                    HtmlText(
+                        html = descContent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .then(
+                                if (needsExpand && !isDescExpanded) {
+                                    Modifier.height(220.dp)
+                                } else {
+                                    Modifier
+                                }
+                            )
+                    )
 
                     // Chỉ hiển thị nút mở rộng khi nội dung vượt ngưỡng
                     if (needsExpand) {
@@ -304,8 +332,11 @@ fun EventDetailScreen(
                             val isExpanded = expandedIndex == index
 
                             // Format dữ liệu ngày giờ
-                            val timeStr = schedule.date?.toDate()?.let {
-                                java.text.SimpleDateFormat("HH:mm", java.util.Locale("vi", "VN")).format(it)
+                            val timeStr = schedule.date?.toDate()?.let { sDate ->
+                                val timeFmt = java.text.SimpleDateFormat("HH:mm", java.util.Locale("vi", "VN"))
+                                val start = timeFmt.format(sDate)
+                                val end = schedule.endDate?.toDate()?.let { timeFmt.format(it) }
+                                if (end != null) "$start - $end" else start
                             } ?: "??:??"
 
                             val dayOfWeek = schedule.date?.toDate()?.let {
@@ -378,20 +409,36 @@ fun EventDetailScreen(
                                             )
                                         }
 
+                                        val startDate = schedule.date?.toDate()
+                                        val endDate = schedule.endDate?.toDate()
+                                         
+                                        val isStarted = startDate != null && startDate.before(now)
+                                        val isEnded = endDate != null && endDate.before(now)
+                                        val isPast = isStarted
+
+                                        val buttonText = when {
+                                            !isStarted -> "Mua vé ngay"
+                                            !isEnded -> "Đang diễn ra"
+                                            else -> "Đã kết thúc"
+                                        }
+
                                         // Nút mua vé ngay
                                         Button(
                                             onClick = { onBuyTicketClick(index) },
+                                            enabled = !isPast,
                                             colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                disabledContainerColor = Color.Gray,
+                                                contentColor = Color.White,
+                                                disabledContentColor = Color.LightGray
                                             ),
                                             shape = RoundedCornerShape(8.dp),
                                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                         ) {
                                             Text(
-                                                "Mua vé ngay",
+                                                text = buttonText,
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 12.sp,
-                                                color = Color.White
+                                                fontSize = 12.sp
                                             )
                                         }
                                     }

@@ -3,6 +3,9 @@ package huce.fit.myezticket.ui
 import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +58,7 @@ fun SetupNavGraph(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0), // Tràn viền hệ thống, để màn hình con tự xử lý insets
         bottomBar = {
             if (showBottomBar) {
                 HomeBottomNavigation(
@@ -88,49 +92,89 @@ fun SetupNavGraph(
             startDestination = "login_screen",
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(
+                    bottom = if (showBottomBar) 80.dp else 0.dp // Chỉ chừa khoảng trống cho Bottom Bar khi hiển thị
+                ),
             enterTransition = {
-                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetState.destination.route in MAIN_TAB_ROUTES
-                if (isTabTransition) {
-                    fadeIn(animationSpec = tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
-                } else {
-                    slideInHorizontally(
-                        animationSpec = tween(NAVIGATION_ANIMATION_DURATION_MILLIS),
-                        initialOffsetX = { it }
-                    ) + fadeIn(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
+                val targetRoute = targetState.destination.route
+                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetRoute in MAIN_TAB_ROUTES
+                
+                when {
+                    isTabTransition -> {
+                        fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing))
+                    }
+                    targetRoute == "search_screen" || targetRoute?.startsWith("search_screen/") == true || targetRoute == "notifications_screen" -> {
+                        // Hiệu ứng trượt từ dưới lên (Slide Up) cao cấp cho tìm kiếm và thông báo
+                        slideInVertically(
+                            initialOffsetY = { it / 6 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(350))
+                    }
+                    else -> {
+                        // Trượt ngang từ phải sang mượt mà
+                        slideInHorizontally(
+                            initialOffsetX = { it / 3 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(350))
+                    }
                 }
             },
             exitTransition = {
-                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetState.destination.route in MAIN_TAB_ROUTES
-                if (isTabTransition) {
-                    fadeOut(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
-                } else {
-                    slideOutHorizontally(
-                        animationSpec = tween(NAVIGATION_ANIMATION_DURATION_MILLIS),
-                        targetOffsetX = { -it / 3 }
-                    ) + fadeOut(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
+                val targetRoute = targetState.destination.route
+                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetRoute in MAIN_TAB_ROUTES
+                
+                when {
+                    isTabTransition -> {
+                        fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing))
+                    }
+                    else -> {
+                        // Trượt mờ nhẹ về phía sau khi mở màn hình mới chồng lên
+                        slideOutHorizontally(
+                            targetOffsetX = { -it / 6 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(350))
+                    }
                 }
             },
             popEnterTransition = {
-                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetState.destination.route in MAIN_TAB_ROUTES
-                if (isTabTransition) {
-                    fadeIn(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
-                } else {
-                    slideInHorizontally(
-                        animationSpec = tween(NAVIGATION_ANIMATION_DURATION_MILLIS),
-                        initialOffsetX = { -it / 3 }
-                    ) + fadeIn(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
+                val targetRoute = targetState.destination.route
+                val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetRoute in MAIN_TAB_ROUTES
+                
+                when {
+                    isTabTransition -> {
+                        fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing))
+                    }
+                    else -> {
+                        // Khi quay lại, màn hình cũ trượt mượt từ phía sau ra trước
+                        slideInHorizontally(
+                            initialOffsetX = { -it / 6 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(350))
+                    }
                 }
             },
             popExitTransition = {
+                val initialRoute = initialState.destination.route
                 val isTabTransition = initialState.destination.route in MAIN_TAB_ROUTES && targetState.destination.route in MAIN_TAB_ROUTES
-                if (isTabTransition) {
-                    fadeOut(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
-                } else {
-                    slideOutHorizontally(
-                        animationSpec = tween(NAVIGATION_ANIMATION_DURATION_MILLIS),
-                        targetOffsetX = { it }
-                    ) + fadeOut(tween(NAVIGATION_ANIMATION_DURATION_MILLIS))
+                
+                when {
+                    isTabTransition -> {
+                        fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing))
+                    }
+                    initialRoute == "search_screen" || initialRoute?.startsWith("search_screen/") == true || initialRoute == "notifications_screen" -> {
+                        // Tìm kiếm/Thông báo trượt dọc xuống dưới khi đóng
+                        slideOutVertically(
+                            targetOffsetY = { it / 6 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(350))
+                    }
+                    else -> {
+                        // Các màn hình khác trượt ngang biến mất sang bên phải
+                        slideOutHorizontally(
+                            targetOffsetX = { it / 3 },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(350))
+                    }
                 }
             }
         ) {
