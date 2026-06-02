@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.hilt.navigation.compose.hiltViewModel
 import huce.fit.myezticket.data.FakeDataGenerator
 import huce.fit.myezticket.ui.viewmodel.EventViewModel
@@ -44,6 +46,7 @@ private const val IDX_WORKSHOP   = 4
 private const val IDX_SPORT      = 5
 private const val IDX_OTHER      = 6
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     eventViewModel: EventViewModel = hiltViewModel(),
@@ -60,6 +63,7 @@ fun HomeScreen(
     val bannerEvents by eventViewModel.bannerEvents.collectAsState()
     val unreadCount  by notificationViewModel.unreadCount.collectAsState()
     val favoriteIds  by favoriteViewModel.favoriteIds.collectAsState()
+    val isRefreshing by eventViewModel.isRefreshing.collectAsState()
 
     // Cập nhật events vào FavoriteViewModel để check thông báo
     LaunchedEffect(events) {
@@ -102,13 +106,18 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            state = listState,
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { eventViewModel.refreshEvents() },
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp)
+                .fillMaxSize()
         ) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
             // ── Item 0: Banner ──────────────────────────────────────────────
             item(key = "banner") {
                 BannerSlider(
@@ -190,7 +199,7 @@ fun HomeScreen(
                         onSeeAllClick = { onSeeAllClick("Khác") }
                     )
                 }
-            }
+            }            }
 
 
         }

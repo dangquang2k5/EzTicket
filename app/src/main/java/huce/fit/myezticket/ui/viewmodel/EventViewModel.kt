@@ -32,6 +32,9 @@ class EventViewModel @Inject constructor(
     private val _bannerEvents = MutableStateFlow<List<Event>>(emptyList())
     val bannerEvents: StateFlow<List<Event>> = _bannerEvents.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     // TRẠNG THÁI TÌM KIẾM
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -101,14 +104,25 @@ class EventViewModel @Inject constructor(
     }
 
     private fun loadEvents() {
+        refreshEvents()
+    }
+
+    fun refreshEvents() {
         viewModelScope.launch {
-            val dataFromFirebase = repository.getEvents()
-            _events.value = dataFromFirebase
-            _filteredEvents.value = dataFromFirebase
-            _bannerEvents.value = dataFromFirebase.filter { it.isBanner }
-            
-            // Lấy danh sách thể loại từ data thực tế
-            _categories.value = listOf("Tất cả") + dataFromFirebase.map { it.category }.distinct()
+            _isRefreshing.value = true
+            try {
+                val dataFromFirebase = repository.getEvents()
+                _events.value = dataFromFirebase
+                _filteredEvents.value = dataFromFirebase
+                _bannerEvents.value = dataFromFirebase.filter { it.isBanner }
+                
+                // Lấy danh sách thể loại từ data thực tế
+                _categories.value = listOf("Tất cả") + dataFromFirebase.map { it.category }.distinct()
+            } catch (e: Exception) {
+                android.util.Log.e("EventViewModel", "Lỗi tải lại dữ liệu: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 

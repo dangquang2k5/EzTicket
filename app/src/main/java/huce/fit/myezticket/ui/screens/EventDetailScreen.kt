@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +55,9 @@ fun EventDetailScreen(
     onBuyTicketClick: (Int) -> Unit = {},
     onEventClick: (String) -> Unit = {},
     isFavorite: Boolean = false,
-    onToggleFavorite: ((String) -> Unit)? = null
+    onToggleFavorite: ((String) -> Unit)? = null,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {}
 ) {
     val now = remember { java.util.Date() }
 
@@ -67,8 +70,10 @@ fun EventDetailScreen(
     }
 
     // Xác định trạng thái và text hiển thị cho Bottom Bar chính
-    val bottomBarButtonText = remember(allSchedulesPast, event.schedules, now) {
-        if (!allSchedulesPast) {
+    val bottomBarButtonText = remember(allSchedulesPast, event.schedules, now, event.status) {
+        if (event.status == "COMING_SOON") {
+            "Sắp mở bán"
+        } else if (!allSchedulesPast) {
             "Mua vé ngay"
         } else {
             // Lấy suất diễn kết thúc muộn nhất
@@ -163,13 +168,13 @@ fun EventDetailScreen(
                     }
                     Button(
                         onClick = {
-                            if (!allSchedulesPast) {
+                            if (!allSchedulesPast && event.status != "COMING_SOON") {
                                 coroutineScope.launch {
                                     scrollState.animateScrollTo(scheduleOffsetPx)
                                 }
                             }
                         },
-                        enabled = !allSchedulesPast,
+                        enabled = !allSchedulesPast && event.status != "COMING_SOON",
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             disabledContainerColor = Color.Gray,
@@ -184,20 +189,47 @@ fun EventDetailScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .background(Color(0xFFF5F5F5))
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .background(Color(0xFFF5F5F5))
+            ) {
             // Ảnh banner
-            AsyncImage(
-                model = event.image_url,
-                contentDescription = "Poster",
-                modifier = Modifier.fillMaxWidth().height(250.dp),
-                contentScale = ContentScale.Crop
-            )
+            Box(modifier = Modifier.fillMaxWidth().height(250.dp)) {
+                AsyncImage(
+                    model = event.image_url,
+                    contentDescription = "Poster",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Badge trạng thái sự kiện COMING_SOON
+                if (event.status == "COMING_SOON") {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(12.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFFF6F00)
+                    ) {
+                        Text(
+                            "Sắp mở bán 🔥",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
 
             // ── Thông tin chung ──────────────────────────────────────────
             Card(
@@ -417,6 +449,7 @@ fun EventDetailScreen(
                                         val isPast = isStarted
 
                                         val buttonText = when {
+                                            event.status == "COMING_SOON" -> "Sắp mở bán"
                                             !isStarted -> "Mua vé ngay"
                                             !isEnded -> "Đang diễn ra"
                                             else -> "Đã kết thúc"
@@ -425,7 +458,7 @@ fun EventDetailScreen(
                                         // Nút mua vé ngay
                                         Button(
                                             onClick = { onBuyTicketClick(index) },
-                                            enabled = !isPast,
+                                            enabled = !isPast && event.status != "COMING_SOON",
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary,
                                                 disabledContainerColor = Color.Gray,
@@ -642,5 +675,6 @@ fun EventDetailScreen(
 
             Spacer(modifier = Modifier.height(60.dp))
         }
+      }
     }
 }

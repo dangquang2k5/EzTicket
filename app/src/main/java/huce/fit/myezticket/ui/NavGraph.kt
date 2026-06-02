@@ -288,6 +288,7 @@ fun SetupNavGraph(
                 val eventId = backStackEntry.arguments?.getString("eventId")
                 val events by eventViewModel.events.collectAsState()
                 val favoriteIds by favoriteViewModel.favoriteIds.collectAsState()
+                val isRefreshing by eventViewModel.isRefreshing.collectAsState()
                 val event = events.find { it.id == eventId }
                 event?.let {
                     EventDetailScreen(
@@ -297,7 +298,9 @@ fun SetupNavGraph(
                         onBuyTicketClick = { scheduleIndex -> navController.navigate("ticket_selection_screen/${it.id}/$scheduleIndex") },
                         onEventClick = { id -> navController.navigate("detail_screen/$id") },
                         isFavorite = it.id in favoriteIds,
-                        onToggleFavorite = { id -> favoriteViewModel.toggleFavorite(id) }
+                        onToggleFavorite = { id -> favoriteViewModel.toggleFavorite(id) },
+                        isRefreshing = isRefreshing,
+                        onRefresh = { eventViewModel.refreshEvents() }
                     )
                 }
             }
