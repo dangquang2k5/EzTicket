@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cập nhật lên Material3 để tương thích hoàn toàn với Jetpack Compose -->
+    <style name="Theme.MyEzTicket" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Theme dành cho Splash Screen hệ thống (Android 12+) -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Nền của Splash Screen hệ thống (trùng với màu nền app #F7F9F8) -->
+        <item name="windowSplashScreenBackground">#F7F9F8</item>
+        <!-- Biểu tượng chính hiển thị ở tâm của Splash Screen (Sử dụng logo_app_splash) -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_app_splash</item>
+        <!-- Theme tiếp theo sau khi splash kết thúc (Theme chính của ứng dụng) -->
+        <item name="postSplashScreenTheme">@style/Theme.MyEzTicket</item>
+    </style>
+</resources>
